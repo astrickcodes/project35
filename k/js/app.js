@@ -5,6 +5,12 @@ import { icon, esc, figure, lineChart, barChart, ring, HABIT_ICONS, load, save, 
 import { openPlayer } from './player.js';
 
 let S = load();
+// Optional display name comes only from the link fragment (#Name), which is never sent to the server; kept on this device.
+const NAME_KEY = 'p35k.name';
+try { const h = decodeURIComponent(location.hash.slice(1)).trim(); if (h && /^[\p{L} .'-]{1,30}$/u.test(h)) { localStorage.setItem(NAME_KEY, h); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
+const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
+const brand = () => myName() ? `Project 35 · ${esc(myName())}` : 'Project 35';
+if (myName()) document.title = `Project 35 · ${myName()}`;
 let view = 'today';
 let habitDate = E.ymd();
 let ob = null, obStep = 0;
@@ -73,7 +79,7 @@ function formSection(i) {
 function renderOnboarding() {
   ob ||= newDraft();
   const last = obStep === 2;
-  app.innerHTML = `<div class="ob"><div class="brand"><span class="logo">35</span>Project 35</div>
+  app.innerHTML = `<div class="ob"><div class="brand"><span class="logo">35</span>${brand()}</div>
     <p class="muted small" style="margin-top:6px">The Better Me Challenge</p>
     <div class="steps">${[0, 1, 2].map(i => `<i class="${i <= obStep ? 'on' : ''}"></i>`).join('')}</div>
     ${obStep === 0 ? `<h1 style="margin-bottom:6px">Let’s build your plan.</h1><p class="muted" style="margin-bottom:22px">Three quick steps. Your coach uses these to choose exercises, sets and reps — then adapts as you improve.</p>` : ''}
@@ -130,7 +136,7 @@ function renderToday() {
   const bm = [...S.benchmarks].sort((a, b) => a.date.localeCompare(b.date));
   const bdelta = k => { const p = bm.filter(b => b[k] != null); return p.length > 1 ? changeText(p[0][k], p[p.length - 1][k], k === 'plank' ? 's' : '') : ''; };
   app.innerHTML = `
-  <div class="page-head"><div><div class="eyebrow">${fmtDate(t)}</div><h1>Project 35</h1></div></div>
+  <div class="page-head"><div><div class="eyebrow">${fmtDate(t)}</div><h1>${brand()}</h1></div></div>
   ${away >= 3 && away < 400 && S.workouts.length ? `<div class="banner">${icon('heart', 20)}<span>Welcome back. No catching up needed — today’s plan is sized for where you are.</span></div>` : ''}
   <div class="stack">
   <section class="card hero" aria-label="Wedding countdown">
@@ -342,7 +348,7 @@ function renderSettings() {
   <section class="card"><h2>Data & backup</h2><p class="muted small" style="margin:4px 0 12px">Everything is stored on this device. Export a backup regularly.</p>
     <div class="col"><button class="btn sec" data-act="export">Export backup (JSON)</button><label class="btn sec" style="cursor:pointer">Import backup<input id="import-in" type="file" accept="application/json" hidden></label><button class="btn danger" data-act="reset">Erase all data</button></div></section>
   <section class="card"><h2>Install</h2><p class="muted small" style="margin:4px 0 10px">${deferredInstall ? 'Install Project 35 for a full-screen, offline experience.' : 'On Android Chrome: menu ⋮ → “Install app” / “Add to Home screen”. It then works fully offline.'}</p>${deferredInstall ? '<button class="btn" data-act="install">Install app</button>' : ''}</section>
-  <p class="tiny dim" style="text-align:center">Project 35 · v1.0</p></div>`;
+  <p class="tiny dim" style="text-align:center">${brand()} · v1.0</p></div>`;
   const imp = $('#import-in'); if (imp) imp.onchange = () => importBackup(imp.files[0]);
 }
 const notifState = () => !('Notification' in window) ? 'Notifications aren’t supported here; you’ll see in-app reminders.' : Notification.permission === 'granted' ? 'Notifications enabled.' : Notification.permission === 'denied' ? 'Notifications are blocked in browser settings — reminders show in-app only.' : 'Turn on a reminder to allow notifications.';
