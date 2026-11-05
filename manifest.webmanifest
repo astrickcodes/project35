@@ -1,0 +1,16 @@
+{
+  "name": "Project 35 – The Better Me Challenge",
+  "short_name": "Project 35",
+  "description": "Habit tracker and AI-free calisthenics coach for the 9 December 2026 wedding.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121513",
+  "theme_color": "#121513",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
