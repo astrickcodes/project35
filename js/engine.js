@@ -152,7 +152,8 @@ export function buildPlan(state, date, opts = {}) {
   if (prog && !prog.before && !prog.complete && phase) reasons.push(`Day ${prog.day} of 34 · ${phase.name}: ${phase.blurb}`);
   const deload = deloadAdvice(state, date);
 
-  if (opts.forceFocus) { focus = opts.forceFocus; reasons.push('You chose this session yourself — the coach still sizes the volume to your recovery.'); }
+  if (prog?.before && !opts.forceFocus) { focus = 'rest'; reasons.push(`Your 34-day programme starts on ${parse(state.settings.startDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}. Until then: rest, drink water, and set up your habits.`); }
+  else if (opts.forceFocus) { focus = opts.forceFocus; reasons.push('You chose this session yourself — the coach still sizes the volume to your recovery.'); }
   else if (dToWed === 0) { focus = 'rest'; reasons.push('It’s your wedding day. No training — hydrate, eat, and enjoy it. You’ve earned it.'); }
   else if (phase?.id === 'taper' || (dToWed >= 1 && dToWed <= 4)) {
     if (dToWed === 1) focus = 'recovery';

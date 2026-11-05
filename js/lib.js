@@ -114,7 +114,7 @@ export const DEFAULT_HABITS = () => [
 export const defaultState = () => ({
   v: 1, onboarded: false, profile: {},
   settings: {
-    theme: 'dark', weddingDate: '2026-12-09', wakeTime: '06:30', stepGoal: 8000, waterGoal: 3000, startDate: '2026-11-05',
+    theme: 'dark', weddingDate: '2026-12-09', wakeTime: '06:30', stepGoal: 8000, waterGoal: 3000, startDate: '2026-11-06',
     reminders: {
       morning: { on: false, time: '07:00', label: 'Morning habits' }, workout: { on: false, time: '18:00', label: 'Workout time' },
       water: { on: false, every: 120, from: '09:00', to: '21:00', label: 'Drink water' }, evening: { on: false, time: '21:00', label: 'Evening habit review' },

@@ -92,7 +92,7 @@ function validateDraft(step) {
 function finishOnboarding() {
   const t = todayStr();
   S.profile = cleanProfile(ob);
-  S.settings.wakeTime = ob.wake || '06:30'; S.settings.weddingDate = ob.wedding || '2026-12-09'; S.settings.startDate ||= '2026-11-05';
+  S.settings.wakeTime = ob.wake || '06:30'; S.settings.weddingDate = ob.wedding || '2026-12-09'; S.settings.startDate ||= '2026-11-06';
   const water = Math.min(4500, Math.max(2000, Math.round(S.profile.weightKg * 35 / 250) * 250));
   S.settings.waterGoal = water;
   S.habits = DEFAULT_HABITS().map(h => ({ ...h, created: t }));
@@ -315,7 +315,8 @@ function renderSettings() {
     <button class="btn sec" style="margin-top:12px" data-act="profile-edit">${icon('edit', 18)} Update details & goals</button></section>
   <section class="card"><h2>Appearance</h2><div style="margin-top:10px">${seg('theme', [['dark', 'Dark'], ['light', 'Light']], S.settings.theme).replace(/ob-set/g, 'set-theme')}</div></section>
   <section class="card"><h2>Targets</h2><div class="stack" style="margin-top:12px">
-    <div class="grid2"><div><label class="f" for="s-wake">Wake-up time</label><input id="s-wake" type="time" data-set="wakeTime" value="${S.settings.wakeTime}"></div><div><label class="f" for="s-wed">Wedding date</label><input id="s-wed" type="date" data-set="weddingDate" value="${S.settings.weddingDate}"></div></div></div>
+    <div class="grid2"><div><label class="f" for="s-wake">Wake-up time</label><input id="s-wake" type="time" data-set="wakeTime" value="${S.settings.wakeTime}"></div><div><label class="f" for="s-wed">Wedding date</label><input id="s-wed" type="date" data-set="weddingDate" value="${S.settings.weddingDate}"></div></div>
+    <div><label class="f" for="s-start">Programme start date</label><input id="s-start" type="date" data-set="startDate" value="${S.settings.startDate}"></div></div>
     <p class="hint">Water and step targets are edited on each habit (Habits → tap a habit name).</p></section>
   <section class="card"><h2>Reminders</h2><p class="muted small" style="margin:4px 0 4px">${notifState()}</p>
     ${rem('morning')}${rem('workout')}
@@ -547,7 +548,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.dataset.set) { S.settings[t.dataset.set] = t.value; persist(); toast('Saved'); }
+  if (t.dataset.set) { if (!t.value) return; S.settings[t.dataset.set] = t.value; if (['startDate', 'weddingDate'].includes(t.dataset.set)) { S.plans = {}; const td = todayStr(); if (!workoutDoneToday(td)) E.planFor(S, td, true); } persist(); toast('Saved'); }
   if (t.dataset.rem) { const v = t.dataset.f === 'every' ? +t.value : t.value; S.settings.reminders[t.dataset.rem][t.dataset.f] = v; persist(); toast('Reminder updated'); }
 });
 
