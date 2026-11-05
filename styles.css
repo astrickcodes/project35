@@ -238,3 +238,5 @@ input::placeholder,textarea::placeholder{color:var(--dim)}
 .frames .fig{max-height:90px}
 
 .fig.sm{max-height:120px}
+
+.info-ov{align-items:stretch;justify-content:flex-start;overflow:auto;text-align:left;padding:16px}.info-sheet{width:100%;max-width:520px;margin:0 auto;padding-bottom:30px}.info-btn{align-self:center;margin:10px auto 0;width:100%}
