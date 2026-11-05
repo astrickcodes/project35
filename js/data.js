@@ -1,4 +1,3 @@
-import { NEW_POSES, POSE_FOR, ARROW_J, PROP_FOR } from './poses.js';
 // Exercise library, progression chains, poses for the stick-figure demos.
 // Pure data — no DOM access, safe to import from Node for testing.
 
@@ -87,7 +86,6 @@ const birdB = { H:[150,52], S:[130,58], P:[80,58], K:[80,92], F:[56,96], E:[152,
 const trA = { ...quadAll, E:[130,78], W:[124,60] };
 const trB = { ...quadAll, E:[126,70], W:[122,44] };
 export const POSES = {
-  ...NEW_POSES,
   pressA, pressB, birdB, trA, trB,
   stand, fwd, up, jackOut, jackIn, squatDn, lungeDn, lungeBulg, pushUp, pushDn, kneeUp, kneeDn, incUp, incDn, decUp, decDn,
   wallUp, wallDn, pikeUp, pikeDn, plankA, plankB, sideA, sideB, mtnA, mtnB, dbA, dbB, lrFlat, lrUp, bicA, bicB, hollowA, hollowB,
@@ -303,10 +301,6 @@ add(
 );
 
 // ---------- Progression chains (index 0 = easiest). Dynamic chains depend on equipment.
-for (const [id, pz] of Object.entries(POSE_FOR)) if (EX[id]) EX[id].poses = pz;
-for (const [id, j] of Object.entries(ARROW_J)) if (EX[id]) EX[id].arrowJ = j;
-for (const [id, s] of Object.entries(PROP_FOR)) if (EX[id]) { EX[id].propSvg = s; EX[id].props = undefined; }
-
 export const CHAINS = {
   push: ['wallPush','inclinePush','kneePush','pushup','diamond','decline'],
   inclineAcc: ['inclinePush'],

@@ -47,56 +47,21 @@ const PROPS = {
   table: '<line x1="100" y1="66" x2="170" y2="66" stroke-width="4"/><line x1="170" y1="66" x2="170" y2="100"/>',
 };
 const FB = { K2: 'K', F2: 'F', E2: 'E', W2: 'W' };
-// Which body segments to highlight for each muscle group (green = working, grey = assisting).
-const HL = { chest: ['SP'], back: ['SP'], core: ['SP'], glutes: ['SP', 'PK'], shoulders: ['SE'], arms: ['SE', 'EW'], legs: ['PK', 'KF'] };
-const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
-// Draws the figure. frame = 0|1 → static start/end pose; otherwise animated loop between the two poses.
-export function figure(ex, { size = 'lg', frame = null, arrow = frame !== 1 } = {}) {
-  const [pa, pb] = (ex.poses || ['stand', 'stand']).map(n => POSES[n] || POSES.stand);
-  const still = frame !== null, hold = ex.poses && ex.poses[0] === ex.poses[1];
-  const a = still && frame === 1 ? pb : pa, b = still ? a : pb;
+export function figure(ex, { size = 'lg' } = {}) {
+  const [a, b] = (ex.poses || ['stand', 'stand']).map(n => POSES[n] || POSES.stand);
+  const hold = ex.poses && ex.poses[0] === ex.poses[1];
   const get = (p, j) => p[j] || (FB[j] && p[FB[j]]) || p[j.replace('2', '')];
-  const anim = (attr, va, vb) => still || va === vb ? '' : `<animate attributeName="${attr}" values="${va};${vb};${va}" keyTimes="0;.5;1" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" dur="${hold ? 3 : 2.4}s" repeatCount="indefinite"/>`;
-  const hl = new Set((ex.groups || []).flatMap(g => HL[g] || []));
-  const seg = (j1, j2, w, key, far = false) => {
+  const anim = (attr, va, vb) => `<animate attributeName="${attr}" values="${va};${vb};${va}" keyTimes="0;.5;1" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" dur="${hold ? 3 : 2.2}s" repeatCount="indefinite"/>`;
+  const line = (j1, j2, cls = '') => {
     const p1a = get(a, j1), p2a = get(a, j2), p1b = get(b, j1), p2b = get(b, j2);
-    const cls = `limb w${w} ${far ? 'far' : hl.size && !hl.has(key) ? 'calm' : ''}`;
-    return `<line class="${cls}" x1="${p1a[0]}" y1="${p1a[1]}" x2="${p2a[0]}" y2="${p2a[1]}">${anim('x1', p1a[0], p1b[0])}${anim('y1', p1a[1], p1b[1])}${anim('x2', p2a[0], p2b[0])}${anim('y2', p2a[1], p2b[1])}</line>`;
+    return `<line class="limb ${cls}" x1="${p1a[0]}" y1="${p1a[1]}" x2="${p2a[0]}" y2="${p2a[1]}">${anim('x1', p1a[0], p1b[0])}${anim('y1', p1a[1], p1b[1])}${anim('x2', p2a[0], p2b[0])}${anim('y2', p2a[1], p2b[1])}</line>`;
   };
-  const dot = (j, r, cls = 'joint') => { const q = get(a, j), q2 = get(b, j); return `<circle class="${cls}" r="${r}" cx="${q[0]}" cy="${q[1]}">${anim('cx', q[0], q2[0])}${anim('cy', q[1], q2[1])}</circle>`; };
-  const two = ['K2', 'F2', 'E2', 'W2'].some(j => pa[j] || pb[j]);
-  // facing direction, used to draw feet
-  const up = Math.abs(a.S[0] - a.P[0]) < 22, face = up ? (Math.sign(a.K[0] - a.P[0]) || 1) : 0;
-  const foot = (j, far) => { if (j === 'F' && a.FT) { const q = a.FT, q2 = b.FT, f = a.F, f2 = b.F; return `<line class="limb w4 calm" x1="${f[0]}" y1="${f[1]}" x2="${q[0]}" y2="${q[1]}">${anim('x1', f[0], f2[0])}${anim('y1', f[1], f2[1])}${anim('x2', q[0], q2[0])}${anim('y2', q[1], q2[1])}</line>`; } if (!face || get(a, j)[1] < 88) return ''; const q = get(a, j), q2 = get(b, j); const x = d => d + face * 9; return `<line class="limb w4 ${far ? 'far' : 'calm'}" x1="${q[0]}" y1="${q[1]}" x2="${x(q[0])}" y2="${q[1]}">${anim('x1', q[0], q2[0])}${anim('y1', q[1], q2[1])}${anim('x2', x(q[0]), x(q2[0]))}${anim('y2', q[1], q2[1])}</line>`; };
-  // zoom the view box to the pose so small figures fill the frame (exercises with props keep the fixed frame)
-  let vb = [0, 0, 200, 110];
-  if (!ex.props) {
-    const pts = [...Object.values(pa), ...Object.values(pb)].filter(Array.isArray);
-    const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-    const h = Math.max(y1 - y0 + 30, (x1 - x0 + 40) / 1.82, 60), w = Math.max(x1 - x0 + 40, h * 1.25);
-    vb = [+((x0 + x1) / 2 - w / 2).toFixed(1), +(Math.max(y1 + 6, 8) - h + 0).toFixed(1), +w.toFixed(1), +h.toFixed(1)];
-  }
-  const gy = 101 - (ex.props ? 0 : 0);
-  let s = `<svg class="fig ${size}" viewBox="${vb.join(' ')}" role="img" aria-label="${esc(ex.name)} demonstration"><g class="props">${ex.propSvg || PROPS[ex.props] || ''}</g><line class="ground" x1="${vb[0] + 4}" y1="${gy}" x2="${vb[0] + vb[2] - 4}" y2="${gy}"/>`;
-  if (two) s += seg('P', 'K2', 8, 'PK', true) + seg('K2', 'F2', 6, 'KF', true) + foot('F2', true) + seg('S', 'E2', 5, 'SE', true) + seg('E2', 'W2', 4, 'EW', true);
-  s += seg('P', 'K', 9, 'PK') + seg('K', 'F', 7, 'KF') + foot('F');
-  s += a.M ? seg('S', 'M', 13, 'SP') + seg('M', 'P', 13, 'SP') : seg('S', 'P', 13, 'SP');
-  s += seg('S', 'E', 6, 'SE') + seg('E', 'W', 5, 'EW');
-  s += dot('K', 3.6) + dot('E', 3.2);
-  if (ex.load || ex.props === 'db') { s += dot('W', 6.2, 'dbell'); if (two && (pa.W2 || pb.W2)) s += dot('W2', 5.4, 'dbell far'); }
-  else s += dot('W', 3, 'hand');
-  s += `<circle class="head" r="8.5" cx="${a.H[0]}" cy="${a.H[1]}">${anim('cx', a.H[0], b.H[0])}${anim('cy', a.H[1], b.H[1])}</circle>`;
-  // movement arrow: the joint that travels the furthest between the two poses
-  if (arrow && !hold || (arrow && pa !== pb)) {
-    const best = ex.arrowJ ? [ex.arrowJ, dist(get(pa, ex.arrowJ), get(pb, ex.arrowJ))] : ['W', 'H', 'F', 'K', 'P'].map(j => [j, dist(get(pa, j), get(pb, j))]).sort((x, y) => y[1] - x[1])[0];
-    if (best && best[1] > 9) {
-      const [x1, y1] = get(pa, best[0]), [x2, y2] = get(pb, best[0]), L = best[1], ux = (x2 - x1) / L, uy = (y2 - y1) / L, nx = -uy * 14, ny = ux * 14;
-      const sx = x1 + ux * 8 + nx, sy = y1 + uy * 8 + ny, ex2 = x2 - ux * 8 + nx, ey = y2 - uy * 8 + ny;
-      const hx = ex2 + ux * 1, hy = ey + uy * 1;
-      s += `<g class="arrow"><line x1="${sx}" y1="${sy}" x2="${ex2}" y2="${ey}"/><polygon points="${hx + ux * 6},${hy + uy * 6} ${hx - uy * 4},${hy + ux * 4} ${hx + uy * 4},${hy - ux * 4}"/></g>`;
-    }
-  }
-  return s + '</svg>';
+  const two = ['K2', 'F2', 'E2', 'W2'].some(j => a[j] || b[j]);
+  let s = `<svg class="fig ${size}" viewBox="0 0 200 110" role="img" aria-label="${esc(ex.name)} demonstration"><g class="props">${PROPS[ex.props] || ''}</g><line class="ground" x1="6" y1="101" x2="194" y2="101"/>`;
+  if (two) s += line('P', 'K2', 'far') + line('K2', 'F2', 'far') + line('S', 'E2', 'far') + line('E2', 'W2', 'far');
+  s += line('S', 'P') + line('P', 'K') + line('K', 'F') + line('S', 'E') + line('E', 'W');
+  s += `<circle class="head" r="8" cx="${a.H[0]}" cy="${a.H[1]}">${anim('cx', a.H[0], b.H[0])}${anim('cy', a.H[1], b.H[1])}</circle></svg>`;
+  return s;
 }
 
 // ---------- charts
