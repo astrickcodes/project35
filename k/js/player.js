@@ -172,7 +172,7 @@ const chips = ex => ex.muscles.split(',').map(m => { m = m.trim(); return `<span
 function header() {
   const st = cur(), grp = P.steps.filter(s => s.g === st.g), idx = grp.indexOf(st) + 1;
   return `<div class="pl-top"><button class="icon-btn" data-p="quit" aria-label="Close workout">${icon('close', 22)}</button>
-    <div class="grow" style="text-align:center"><div class="pl-phase">${st.g} · ${idx}/${grp.length}</div><div class="muted small" id="elapsed">${mmss(Math.round(P.activeMs / 1000))}</div></div>
+    <div class="grow" style="text-align:center"><div class="pl-phase">${st.g}${st.it.round ? ` · Round ${st.it.round}/2` : ''} · ${idx}/${grp.length}</div><div class="muted small" id="elapsed">${mmss(Math.round(P.activeMs / 1000))}</div></div>
     <button class="icon-btn" data-p="pause" aria-label="Pause">${icon('pause', 22)}</button></div>
     <div class="segs">${P.steps.map((s, i) => `<i class="${i < P.i ? 'done' : i === P.i ? 'cur' : ''}"></i>`).join('')}</div>`;
 }

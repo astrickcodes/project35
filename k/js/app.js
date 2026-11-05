@@ -142,7 +142,7 @@ function renderToday() {
     ${pg && !pg.before && !pg.complete && pg.phase ? `<button class="phase-row" data-act="programme-open"><span><b>Day ${pg.day} of 34</b> · ${pg.phase.name}</span><span class="accent small">View programme ›</span></button>` : ''}
     <p class="quote" style="margin-top:12px">${esc(E.motivation(S, t))}</p>
   </section>
-  ${plan.pre ? upcomingCard() : ''}
+  ${plan.pre ? `<div class="note">Programme starts ${fmtDate(S.settings.startDate)}. Your first circuit is ready to preview below.</div>` : ''}
   ${workoutCard(plan, done, resumable)}
   <div class="stats">
     <div class="stat">${ring(comp, { size: 62, stroke: 6, label: pct(comp) + '%' })}<small>Habits today</small></div>
@@ -195,7 +195,7 @@ function workoutCard(plan, done, resumable) {
     <div class="row between"><div class="eyebrow">${KIND_LABEL[plan.kind]}${plan.phase ? ` · ${plan.phase.name}` : ''}</div>${intens ? `<span class="pill neutral">${intens}</span>` : ''}</div>
     <h2 style="font-size:24px;margin-top:6px">${esc(plan.title)}</h2>
     <p class="muted" style="margin-top:2px">${esc(plan.sub)}</p>
-    ${rest ? '' : `<div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><span class="pill">${icon('bolt', 15)} ${mins} min</span><span class="pill neutral">${plan.main.length} ${isTrain ? 'exercises' : 'movements'}</span>${isTrain ? '<span class="pill neutral">40s work · 20s rest</span>' : ''}</div>`}
+    ${rest ? '' : `<div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><span class="pill">${icon('bolt', 15)} ${mins} min</span><span class="pill neutral">${new Set(plan.main.map(it => it.exId)).size} ${isTrain ? 'exercises' : 'movements'}</span>${plan.circuit ? `<span class="pill neutral">2 rounds · ${plan.main[0]?.target || 40}s work · 20s rest</span>` : ''}</div>`}
     ${plan.video ? `<a class="small muted" style="display:inline-block;margin-top:10px" href="${plan.video}" target="_blank" rel="noopener noreferrer">Optional follow-along video ↗</a>` : ''}
     ${thumbs.length ? `<div class="ex-thumbs">${thumbs.map(it => `<div class="thumb">${figure(EX[it.exId], { size: 'sm' })}<span>${esc(EX[it.exId].name)}</span></div>`).join('')}</div>` : ''}
     <details class="why"><summary>${icon('info', 16)} Why this workout?</summary><ul>${plan.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul></details>
@@ -541,6 +541,7 @@ const A = {
     for (const s of [0, 1]) if (!validateDraft(s)) return;
     const recal = $('#recal').classList.contains('on');
     S.profile = cleanProfile(ob); S.settings.wakeTime = ob.wake; S.settings.weddingDate = ob.wedding;
+    if (S.profile.weightKg == null) { S.settings.waterGoal = 2500; const water = S.habits.find(h => h.id === 'water'); if (water) water.target = 2500; }
     if (recal) S.prog = E.initProg(S.profile); else E.ensureProg(S);
     const t = todayStr(); if (!workoutDoneToday(t)) E.planFor(S, t, true);
     persist(); closeSheet(); render(); toast('Profile updated — coach plan refreshed');

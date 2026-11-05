@@ -149,7 +149,12 @@ export function buildPlan(state, date, opts = {}) {
   let focus = WEEK[parse(date).getDay()], intensity = 'normal';
   // Continue the legs / upper / core rotation across weeks, with Thursday mobility and Sunday recovery.
   const trainingDay = { 1:0, 2:1, 3:2, 5:3, 6:4 }[parse(date).getDay()];
-  if (trainingDay != null && prog && !prog.before) focus = ['lower', 'upper', 'backcore'][(Math.floor((prog.day - 1) / 7) * 5 + trainingDay) % 3];
+  if (trainingDay != null && prog && !prog.before) {
+    const elapsed = Math.max(0, diffDays(date, state.settings.startDate));
+    let completed = Math.floor(elapsed / 7) * 5;
+    for (let i = 0; i < elapsed % 7; i++) if (WEEK[parse(addDays(state.settings.startDate, i)).getDay()] !== 'posture' && WEEK[parse(addDays(state.settings.startDate, i)).getDay()] !== 'recovery') completed++;
+    focus = ['lower', 'upper', 'backcore'][completed % 3];
+  }
   const phase = prog?.phase && !prog.before ? prog.phase : null;
   const dayName = parse(date).toLocaleDateString('en-GB', { weekday: 'long' });
   if (prog && !prog.before && !prog.complete && phase) reasons.push(`Day ${prog.day} of 34 · ${phase.name}: ${phase.blurb}`);
@@ -205,7 +210,7 @@ export function buildPlan(state, date, opts = {}) {
     plan.video = { lower:'https://www.youtube.com/watch?v=rma9n_xL1i0', upper:'https://www.youtube.com/watch?v=puLJaNv9m18', backcore:'https://www.youtube.com/watch?v=mUI4hXTmAkw' }[focus];
     plan.seconds = planSeconds([...plan.warm, ...plan.main, ...plan.cool]) + 20;
     plan.dropped = 0; plan.circuit = true;
-    reasons.push('Two rounds: 40 seconds of controlled work, 20 seconds to rest and change position. Warm-up and cool-down included in approximately 15 minutes.');
+    reasons.push(`Two rounds: ${work} seconds of controlled work, 20 seconds to rest and change position. Warm-up and cool-down included in approximately 15 minutes.`);
     reasons.push('Start with 2 kg for shoulders and core; try 3 or 5 kg for legs and rows only if controlled. Alternate sides within each timer. Keep 2–3 reps in reserve; no jumping.');
     if (intensity !== 'normal') reasons.push('Recovery adjustment: work intervals shortened to 30 seconds.');
     if (circuit.length < fo.slots.length) reasons.push('Some movements were omitted to respect your equipment or limitations.');
