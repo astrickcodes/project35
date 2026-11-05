@@ -448,7 +448,7 @@ export function weeklyReport(state, today, offset = 0) {
   const changes = ws.flatMap(w => w.changes || []).filter(c => ['up', 'level', 'pr'].includes(c.kind));
   const hardN = ws.filter(w => w.rpe === 'hard').length;
   const mob = days.filter(d => mobilityDone(state, d)).length;
-  const walk = walkStats(state, days[days.length - 1]);
+  const walk = walkStats(state, days.length ? days[days.length - 1] : today);
   const best = ex => Math.max(0, ...ws.flatMap(w => w.items.filter(i => i.exId === ex).flatMap(i => i.sets.filter(s => s.done).map(s => +s.reps || 0))));
   const r = { start, days: days.length, sessions: ws.length, scheduled, strength, habits: hab, readiness: rds.length ? +(rds.reduce((a, b) => a + b, 0) / rds.length).toFixed(1) : null, changes, mobility: mob, walk, hardN, minutes: Math.round(ws.reduce((a, w) => a + (w.durationSec || 0), 0) / 60), pushBest: Math.max(best('pushup'), best('inclinePush')), plankBest: best('plank'), notes: [] };
   if (r.sessions >= r.scheduled - 1 && r.scheduled) r.notes.push('Excellent consistency — you completed nearly every planned session.');
