@@ -25,7 +25,7 @@ const num = v => (v === '' || v == null || isNaN(+v) ? null : +v);
 function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), ms); }
 function applyTheme() {
   document.documentElement.dataset.theme = S.settings.theme;
-  document.querySelector('meta[name=theme-color]').content = S.settings.theme === 'light' ? '#f3f5f3' : '#121513';
+  document.querySelector('meta[name=theme-color]').content = S.settings.theme === 'light' ? '#fbf5f7' : '#161114';
 }
 function sheet(html, onClose) {
   const w = $('#sheet'); w.hidden = false;

@@ -1,11 +1,11 @@
 :root{
-  --bg:#111412;--bg2:#171b19;--card:#1b201d;--card2:#232925;--line:#2c332f;--text:#eef2ee;--mute:#8e9992;--dim:#5f6a63;
-  --accent:#52d68f;--accent-ink:#06210f;--accent-soft:rgba(82,214,143,.13);--warn:#e9b44c;--danger:#e8685f;
+  --bg:#161114;--bg2:#1c1519;--card:#221a1f;--card2:#2b2127;--line:#3a2c34;--text:#f6eef2;--mute:#a8949e;--dim:#6f5f68;
+  --accent:#f28ab2;--accent-ink:#2a0716;--accent-soft:rgba(242,138,178,.14);--warn:#e9b44c;--danger:#e8685f;
   --r:20px;--shadow:0 10px 30px rgba(0,0,0,.35);--font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 [data-theme=light]{
-  --bg:#f3f5f3;--bg2:#e9ede9;--card:#ffffff;--card2:#eef2ee;--line:#dde3de;--text:#141a16;--mute:#5d6a62;--dim:#98a39b;
-  --accent:#1f9d5c;--accent-ink:#fff;--accent-soft:rgba(31,157,92,.11);--shadow:0 8px 24px rgba(20,40,28,.08);
+  --bg:#fbf5f7;--bg2:#f4e9ee;--card:#ffffff;--card2:#f8eef2;--line:#ecdce3;--text:#2a1620;--mute:#7a5f6c;--dim:#b49ca8;
+  --accent:#b03a6b;--accent-ink:#fff;--accent-soft:rgba(176,58,107,.10);--shadow:0 8px 24px rgba(60,20,40,.08);
 }
 [hidden]{display:none!important}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -209,7 +209,7 @@ input::placeholder,textarea::placeholder{color:var(--dim)}
 .pcell.today{box-shadow:0 0 0 2px var(--accent) inset}.pcell.past{opacity:.6}
 .stages{display:flex;flex-direction:column;gap:8px}.stage{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--mute)}
 .stage i{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);flex:none}.stage.done i{background:var(--accent);border-color:var(--accent)}
-.stage.cur{color:var(--text);font-weight:700}.stage.cur i{border-color:var(--accent);box-shadow:0 0 0 4px rgba(82,214,143,.2)}
+.stage.cur{color:var(--text);font-weight:700}.stage.cur i{border-color:var(--accent);box-shadow:0 0 0 4px rgba(242,138,178,.2)}
 .weight-in{display:flex;align-items:center;gap:10px;justify-content:center;margin:2px 0 10px}
 .weight-in input{width:110px;min-height:52px;font-size:20px;text-align:center}
 .rate-row{display:flex;gap:8px;justify-content:center;margin-top:10px}.rate-row button{min-height:44px;padding:0 14px;border-radius:12px;background:var(--card2);font-weight:600;font-size:14px}.rate-row button.on{background:var(--accent);color:var(--accent-ink)}
