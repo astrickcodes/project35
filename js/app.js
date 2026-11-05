@@ -558,6 +558,9 @@ function runPlayer(plan) {
 }
 
 // ---------- boot
+// One-time migration: programme start moved from 5 Nov to 6 Nov for users who haven't trained yet.
+if (S.onboarded && !S.migrated1 && S.settings.startDate === '2026-11-05' && !S.workouts.length && todayStr() <= '2026-11-05') { S.settings.startDate = '2026-11-06'; S.plans = {}; }
+S.migrated1 = true; persist();
 render();
 setInterval(tickReminders, 20000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tickReminders(); if (todayStr() !== habitDate && view === 'habits' && E.diffDays(todayStr(), habitDate) > 6) habitDate = todayStr(); } });
