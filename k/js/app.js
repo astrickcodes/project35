@@ -142,14 +142,14 @@ function renderToday() {
     ${pg && !pg.before && !pg.complete && pg.phase ? `<button class="phase-row" data-act="programme-open"><span><b>Day ${pg.day} of 34</b> · ${pg.phase.name}</span><span class="accent small">View programme ›</span></button>` : ''}
     <p class="quote" style="margin-top:12px">${esc(E.motivation(S, t))}</p>
   </section>
-  ${plan.pre ? `<div class="note">Programme starts ${fmtDate(S.settings.startDate)}. Your first circuit is ready to preview below.</div>` : ''}
+  ${E.programme(S, todayStr())?.before ? upcomingCard() : ''}
   ${workoutCard(plan, done, resumable)}
   <div class="stats">
     <div class="stat">${ring(comp, { size: 62, stroke: 6, label: pct(comp) + '%' })}<small>Habits today</small></div>
     <div class="stat"><span class="accent">${icon('flame', 26)}</span><b>${st.cur}</b><small>day streak${st.best > st.cur ? ` · best ${st.best}` : ''}</small></div>
     <div class="stat">${ring(ws.score / 100, { size: 62, stroke: 6, label: ws.score })}<small>Weekly score</small></div>
   </div>
-  ${!E.checkinDone(ci) ? checkinCard(ci) : `<div class="card row between" style="padding:14px 18px"><div><div class="eyebrow">Readiness check-in</div><p class="small muted" style="margin-top:2px">Energy ${ci.energy}/5 · Soreness ${ci.soreness}/5 · Sleep ${ci.sleep}/5 → <b>${E.readiness(ci)}/5</b></p></div><button class="btn sm sec" data-act="checkin-edit">Change</button></div>`}
+  ${pg?.before ? '' : !E.checkinDone(ci) ? checkinCard(ci) : `<div class="card row between" style="padding:14px 18px"><div><div class="eyebrow">Readiness check-in</div><p class="small muted" style="margin-top:2px">Energy ${ci.energy}/5 · Soreness ${ci.soreness}/5 · Sleep ${ci.sleep}/5 → <b>${E.readiness(ci)}/5</b></p></div><button class="btn sm sec" data-act="checkin-edit">Change</button></div>`}
   <section class="card"><div class="row between"><h2>This week</h2><button class="pill" data-act="report-open">Weekly report ›</button></div>
     ${weekDots(t)}
     <div class="kpis" style="margin-top:14px">
