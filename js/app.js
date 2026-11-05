@@ -141,13 +141,14 @@ function renderToday() {
     ${pg && !pg.before && !pg.complete && pg.phase ? `<button class="phase-row" data-act="programme-open"><span><b>Day ${pg.day} of 34</b> · ${pg.phase.name}</span><span class="accent small">View programme ›</span></button>` : ''}
     <p class="quote" style="margin-top:12px">${esc(E.motivation(S, t))}</p>
   </section>
+  ${E.programme(S, todayStr())?.before ? upcomingCard() : ''}
   ${workoutCard(plan, done, resumable)}
   <div class="stats">
     <div class="stat">${ring(comp, { size: 62, stroke: 6, label: pct(comp) + '%' })}<small>Habits today</small></div>
     <div class="stat"><span class="accent">${icon('flame', 26)}</span><b>${st.cur}</b><small>day streak${st.best > st.cur ? ` · best ${st.best}` : ''}</small></div>
     <div class="stat">${ring(ws.score / 100, { size: 62, stroke: 6, label: ws.score })}<small>Weekly score</small></div>
   </div>
-  ${!E.checkinDone(ci) ? checkinCard(ci) : `<div class="card row between" style="padding:14px 18px"><div><div class="eyebrow">Readiness check-in</div><p class="small muted" style="margin-top:2px">Energy ${ci.energy}/5 · Soreness ${ci.soreness}/5 · Sleep ${ci.sleep}/5 → <b>${E.readiness(ci)}/5</b></p></div><button class="btn sm sec" data-act="checkin-edit">Change</button></div>`}
+  ${pg?.before ? '' : !E.checkinDone(ci) ? checkinCard(ci) : `<div class="card row between" style="padding:14px 18px"><div><div class="eyebrow">Readiness check-in</div><p class="small muted" style="margin-top:2px">Energy ${ci.energy}/5 · Soreness ${ci.soreness}/5 · Sleep ${ci.sleep}/5 → <b>${E.readiness(ci)}/5</b></p></div><button class="btn sm sec" data-act="checkin-edit">Change</button></div>`}
   <section class="card"><div class="row between"><h2>This week</h2><button class="pill" data-act="report-open">Weekly report ›</button></div>
     ${weekDots(t)}
     <div class="kpis" style="margin-top:14px">
@@ -167,6 +168,17 @@ function renderToday() {
     ${hs.map(h => habitRow(h, t)).join('')}
   </section>
   </div>`;
+}
+function upcomingCard() {
+  const sd = S.settings.startDate, nx = E.buildPlan(S, sd), mins = Math.max(1, Math.round(nx.seconds / 60));
+  const thumbs = [...nx.main, ...(nx.mob || [])].filter((it, i, a) => a.findIndex(x => x.exId === it.exId) === i);
+  const when = E.diffDays(sd, todayStr()) === 1 ? 'Tomorrow' : fmtDate(sd, { weekday: 'long', day: 'numeric', month: 'short' });
+  return `<section class="card" style="border-color:var(--accent)"><div class="eyebrow accent">${when} · Day 1 of 34 · Foundation</div>
+    <h2 style="font-size:24px;margin-top:6px">${esc(nx.title)}</h2><p class="muted" style="margin-top:2px">${esc(nx.sub)}</p>
+    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><span class="pill">${icon('bolt', 15)} ${mins} min</span><span class="pill neutral">${nx.main.length} exercises</span><span class="pill neutral">5 · 18 · 5 · 2 plan</span></div>
+    <div class="ex-thumbs">${thumbs.map(it => `<div class="thumb">${figure(EX[it.exId], { size: 'sm' })}<span>${esc(EX[it.exId].name)}</span></div>`).join('')}</div>
+    <p class="small muted" style="margin-top:12px">Tonight: drink water, set out your dumbbells, aim for an early night. Tomorrow morning do the readiness check-in and the coach will fine-tune the session.</p>
+    <div class="grid2" style="margin-top:12px"><button class="btn sec" data-act="programme-open">View 34-day plan</button><button class="btn sec" data-act="nav" data-v="habits">Set up habits</button></div></section>`;
 }
 function checkinCard(ci = {}) {
   const sc = (k, q, a, b) => `<div style="margin-top:14px"><div class="small" style="font-weight:600">${q}</div><div class="scale">${[1, 2, 3, 4, 5].map(v => `<button data-act="checkin" data-k="${k}" data-v="${v}" class="${ci[k] === v ? 'on' : ''}" aria-label="${v} of 5">${v}</button>`).join('')}</div><div class="scale-labels"><span>${a}</span><span>${b}</span></div></div>`;
@@ -190,7 +202,7 @@ function workoutCard(plan, done, resumable) {
           <button class="btn sec" data-act="extra-mobility">Add a 5-minute stretch</button>` :
       `<button class="btn xl" data-act="start">${icon('play', 22)} ${resumable ? 'Resume workout' : rest ? 'Optional gentle stretching' : isTrain ? 'Start workout' : 'Start session'}</button>
        ${resumable ? '<button class="btn ghost" data-act="discard-session">Discard saved progress</button>' : ''}
-       <div class="grid2">${rest ? '' : `<button class="btn ghost sm" data-act="plan-edit">${icon('edit', 16)} Edit / skip exercises</button>`}<button class="btn ghost sm" data-act="change-focus">${icon('swap', 16)} Different session</button></div>`}
+       <div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap">${rest ? '' : `<button class="btn ghost sm" data-act="plan-edit">Edit / skip exercises</button>`}<button class="btn ghost sm" data-act="change-focus">Different session</button></div>`}
     </div></section>`;
 }
 

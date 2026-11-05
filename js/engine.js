@@ -179,7 +179,7 @@ export function buildPlan(state, date, opts = {}) {
   if (focus === 'recovery' && !opts.forceFocus && !phase?.id) reasons.push('Gentle movement helps recovery. Do your weekly check-in and read your report.');
   if (focus === 'recovery' && parse(date).getDay() === 0) reasons.push('Sunday: gentle walk, light stretching, then review your weekly report in Progress.');
 
-  const plan = { date, focus, title: fo.title, sub: fo.sub, intensity, reasons, minutes, kind: fo.kind, warm: [], main: [], mob: [], cool: [], readiness: rd, phase: phase ? { id: phase.id, name: phase.name, day: prog.day } : null, hold: phase?.id === 'consolidate' || phase?.id === 'taper' };
+  const plan = { pre: !!(prog?.before && !opts.forceFocus), date, focus, title: fo.title, sub: fo.sub, intensity, reasons, minutes, kind: fo.kind, warm: [], main: [], mob: [], cool: [], readiness: rd, phase: phase ? { id: phase.id, name: phase.name, day: prog.day } : null, hold: phase?.id === 'consolidate' || phase?.id === 'taper' };
   const mk = (ids, n, tgt) => ids.map(id => timed(id, avoid, equip, tgt)).filter(Boolean).slice(0, n);
   const full = minutes >= 30;
   plan.warm = mk(WARM[focus] || [], full ? 6 : 3, 40).map(it => ({ ...it, target: EX[it.exId].type === 'time' ? 40 : it.target }));

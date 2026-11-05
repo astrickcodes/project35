@@ -1,5 +1,5 @@
 // Offline-first: precache the app shell, network-first with offline cache fallback.
-const CACHE = 'p35-v5';
+const CACHE = 'p35-v6';
 const SHELL = ['./', 'index.html', 'styles.css', 'manifest.webmanifest', 'js/app.js', 'js/engine.js', 'js/data.js', 'js/lib.js', 'js/player.js', 'icons/icon-maskable-512.png', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
