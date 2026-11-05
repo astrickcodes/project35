@@ -1,6 +1,7 @@
 // Interactive workout player: single overlay screen — demo, sets, rest timer, pause, summary.
 import { EX } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
+import { guideHtml } from './guide.js';
 
 let C = null, P = null, tickId = null, wake = null, audio = null;
 const root = () => document.getElementById('player');
@@ -198,7 +199,8 @@ function draw() {
     <h1 class="pl-name">${esc(ex.name)}</h1>
     <div class="pl-target">${it.sets.length > 1 ? `${it.sets.length} sets × ` : ''}${it.target}${timeSet ? ' sec' : ' reps'}${uni}${it.role === 'main' ? ` · rest ${it.rest}s` : ''}${it.swapped ? ' · <span class="accent">easier version</span>' : ''}</div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${chips(ex)}</div>
-    <div class="pl-fig">${figure(ex)}</div>
+    <div class="pl-fig">${figure(ex)}<div class="legend"><span><i style="background:var(--accent)"></i>Muscles working</span>${ex.load ? '<span><i style="background:#e9eeea"></i>Dumbbell</span>' : ''}<span><i style="background:#6f7f76"></i>Supporting</span></div></div>
+    ${ex.poses && ex.poses[0] !== ex.poses[1] ? `<div class="frames"><figure>${figure(ex, { size: 'sm', frame: 0 })}<figcaption>1 · Start</figcaption></figure><figure>${figure(ex, { size: 'sm', frame: 1, arrow: false })}<figcaption>2 · Finish</figcaption></figure></div>` : ''}
     ${it.sets.length > 1 ? `<div class="setchips">${it.sets.map((s, i) => `<div class="setchip ${s.done ? 'done' : i === setIdx ? 'cur' : ''}"><span>Set ${i + 1}</span><b>${s.done ? s.reps + unitOf(it) : '–'}</b></div>`).join('')}</div>` : ''}
     ${timeSet ? `<div class="bigtime" id="tm">${mmss(P.tRun ? Math.max(0, Math.ceil((P.tEnd - Date.now()) / 1000)) : it.target)}</div>
         <div style="display:flex;justify-content:center;margin:4px 0 8px">${ring(P.tRun ? Math.max(0, (P.tEnd - Date.now()) / 1000 / P.tTotal) : 1, { size: 96, stroke: 7, label: '', sub: '' })}</div>` :
@@ -206,7 +208,7 @@ function draw() {
        <p class="muted small" style="text-align:center;margin-top:-6px">Reps you actually completed${uni}</p>`}
     ${it.load ? `<div class="weight-in"><button class="icon-btn" data-p="wt-" aria-label="Lighter">${icon('minus', 20)}</button><input id="wt" type="number" step="0.5" inputmode="decimal" placeholder="kg" value="${P.weight ?? ''}" aria-label="Dumbbell weight in kg"><span class="muted">kg each</span><button class="icon-btn" data-p="wt+" aria-label="Heavier">${icon('plus', 20)}</button></div>
       <p class="hint" style="text-align:center;margin:-4px 0 8px">${it.loadUp ? 'You’ve earned a heavier dumbbell — go up one small step. ' : P.weight ? '' : 'Pick a load that leaves 2–3 reps in reserve. '}</p>` : ''}
-    <ul class="cues">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+    <div class="guide">${guideHtml(ex, esc, { first: !(C.S.workouts || []).some(w => w.items?.some(i => i.exId === ex.id)) })}</div>
     <div class="pl-bottom">
       ${timeSet ? (P.tRun ? `<button class="btn xl" data-p="finish-early">${icon('check', 22)} Finish now</button>` : `<button class="btn xl" data-p="start-timer">${icon('play', 22)} Start ${it.target}s timer</button>${prep ? '' : `<button class="btn sec" data-p="manual">I did it — log ${it.target}s</button>`}`)
         : `<button class="btn xl" data-p="done-set">${icon('check', 22)} Complete set ${setIdx + 1}</button>`}
