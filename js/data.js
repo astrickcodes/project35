@@ -38,6 +38,14 @@ const bicB = { ...dbA, K:[130,86], F:[158,90], K2:[116,66], F2:[140,70], E:[44,7
 const hollowA = { H:[40,84], S:[56,86], P:[100,92], K:[130,76], F:[150,86], E:[44,66], W:[34,52] };
 const hollowB = { H:[34,80], S:[50,78], P:[100,90], K:[135,84], F:[165,76], E:[36,64], W:[22,52] };
 const vupB = { H:[70,42], S:[70,52], P:[100,90], K:[130,60], F:[150,34], E:[100,60], W:[130,40] };
+const kgBfA = { H:[34,88], S:[50,92], P:[100,92], K:[124,56], F:[112,90], E:[70,94], W:[90,94], K2:[136,62], F2:[118,90] };
+const kgBfB = { ...kgBfA, K:[132,78], F:[112,90], K2:[144,84], F2:[118,90] };
+const kgDiaA = { H:[34,88], S:[50,92], P:[100,92], K:[120,60], F:[104,36], E:[70,94], W:[90,94], K2:[132,62], F2:[108,38] };
+const kgDiaB = { H:[34,88], S:[50,92], P:[100,86], K:[122,48], F:[102,24], E:[70,94], W:[90,94], K2:[134,50], F2:[106,26] };
+const kgKneelA = { H:[94,20], S:[96,34], P:[84,72], K:[116,92], F:[80,100], E:[100,50], W:[110,62] };
+const kgKneelB = { H:[102,16], S:[102,30], P:[110,62], K:[116,92], F:[80,100], E:[106,46], W:[116,58] };
+const kgCrabA = { H:[60,40], S:[72,54], P:[104,84], K:[128,62], F:[144,98], E:[60,78], W:[50,98] };
+const kgCrabB = { H:[62,36], S:[72,52], P:[104,64], K:[130,54], F:[146,98], E:[60,76], W:[50,98] };
 const bridgeA = { H:[24,90], S:[40,92], P:[90,92], K:[130,66], F:[150,92], E:[70,94], W:[100,94] };
 const bridgeB = { ...bridgeA, P:[90,64], S:[40,88], H:[24,86] };
 const slBridgeB = { ...bridgeB, K2:[140,48], F2:[170,34] };
@@ -89,6 +97,7 @@ export const POSES = {
   pressA, pressB, birdB, trA, trB,
   stand, fwd, up, jackOut, jackIn, squatDn, lungeDn, lungeBulg, pushUp, pushDn, kneeUp, kneeDn, incUp, incDn, decUp, decDn,
   wallUp, wallDn, pikeUp, pikeDn, plankA, plankB, sideA, sideB, mtnA, mtnB, dbA, dbB, lrFlat, lrUp, bicA, bicB, hollowA, hollowB,
+  kgBfA, kgBfB, kgDiaA, kgDiaB, kgKneelA, kgKneelB, kgCrabA, kgCrabB,
   vupB, bridgeA, bridgeB, slBridgeB, calfB, wallSitA, wallSitB, dipUp, dipDn, curlA, curlB, rowA, rowB, superA, superB, snowA, snowB,
   hangA, hangHalf, pullTop, burpeeLow, kneeHigh, kneeHighB, quadA, quadB, fold, cat, cow, quadAll, childB, cobraB, hipFlexA, hipFlexB,
   wgsB, chestA, chestB, armOut, armCircUp, tabletopRow, tabletopRowB, inchA, inchB,

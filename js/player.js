@@ -1,19 +1,19 @@
 // Interactive workout player: single overlay screen — demo, sets, rest timer, pause, summary.
-import { EX } from './data.js';
+import { EX, POSES } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
 import { guideHtml, shortCues, videoUrl, MEDIA } from './guide.js';
 
 // Guided 10-minute Kegel workout, in order: 5 moves x 2 min. Each seg: w=big word, s=sub text, d=seconds, k=orb style.
 const KEGEL_MOVES = [
-  ['Butterfly beats', 'Lie on your back, soles together, knees open', 3, 3],
-  ['Kegel bridge', 'Lie with knees bent, feet flat, hips lifted', 6, 4],
-  ['Diamond leg raises', 'Lie on your back, legs lifted in a diamond shape', 4, 4],
-  ['Kneeling hip thrust', 'Kneel tall, hips forward as you squeeze', 4, 4],
-  ['Crab breathing', 'Sit in crab position, hips lifted, breathe slowly', 6, 4],
+  ['Butterfly beats', 'Lie on your back, soles together, knees open', 3, 3, ['kgBfA', 'kgBfB']],
+  ['Kegel bridge', 'Lie with knees bent, feet flat, hips lifted', 6, 4, ['bridgeA', 'bridgeB']],
+  ['Diamond leg raises', 'Lie on your back, legs lifted in a diamond shape', 4, 4, ['kgDiaA', 'kgDiaB']],
+  ['Kneeling hip thrust', 'Kneel tall, hips forward as you squeeze', 4, 4, ['kgKneelA', 'kgKneelB']],
+  ['Crab breathing', 'Sit in crab position, hips lifted, breathe slowly', 6, 4, ['kgCrabA', 'kgCrabB']],
 ];
 function kegelSegs() {
-  const S = [], add = (w, s, d, k) => S.push({ w, s, d, k });
-  KEGEL_MOVES.forEach(([name, setup, on, off], n) => {
+  let mv = 0; const S = [], add = (w, s, d, k) => S.push({ w, s, d, k, m: mv });
+  KEGEL_MOVES.forEach(([name, setup, on, off], n) => { mv = n;
     add('Get ready', `${n + 1} of 5 · ${name} · ${setup}`, 10, 'rest');
     const reps = Math.floor(104 / (on + off));
     for (let r = 1; r <= reps; r++) { add('Squeeze', `${n + 1} of 5 · ${name} · ${r}/${reps}`, on, 'on'); add('Relax', `${n + 1} of 5 · ${name}`, off, 'off'); }
@@ -27,6 +27,7 @@ function kegelUI(rem) {
   const el = KEGEL_TOTAL - Math.max(0, rem); let acc = 0, seg = KEGEL_SEGS[KEGEL_SEGS.length - 1], idx = KEGEL_SEGS.length - 1;
   for (let i = 0; i < KEGEL_SEGS.length; i++) { acc += KEGEL_SEGS[i].d; if (el < acc) { seg = KEGEL_SEGS[i]; idx = i; break; } }
   if (P.kgIdx !== idx) { if (P.kgIdx !== undefined && !seg.k.startsWith('flick')) beep(false); P.kgIdx = idx; }
+  const f = document.getElementById('kgfig'); if (f && f.dataset.m != seg.m) { f.dataset.m = seg.m; f.innerHTML = figure({ poses: KEGEL_MOVES[seg.m][4] }); }
   const w = document.getElementById('kgw'), s = document.getElementById('kgs'), o = document.getElementById('kgorb');
   if (w) w.textContent = seg.w; if (s) s.textContent = seg.s; if (o) o.className = 'kg-orb ' + seg.k;
 }
@@ -241,7 +242,7 @@ function draw() {
     <h1 class="pl-name">${esc(ex.name)}</h1>
     <div class="pl-target">${it.sets.length > 1 ? `${it.sets.length} sets × ` : ''}${it.target}${timeSet ? ' sec' : ' reps'}${uni}${it.role === 'main' ? ` · rest ${it.rest}s` : ''}${it.swapped ? ' · <span class="accent">easier version</span>' : ''}</div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${chips(ex)}</div>
-    <div class="pl-fig">${it.exId === 'kegel' ? `<div class="kg"><div class="kg-orb ${P.tRun ? '' : 'rest'}" id="kgorb"></div><div class="kg-word" id="kgw">${P.tRun ? '' : 'Get comfortable'}</div><div class="kg-sub" id="kgs">${P.tRun ? '' : 'Sit or lie down. Tap start when ready.'}</div></div>` : ''}${it.exId === 'kegel' ? '' : MEDIA.has(it.exId) ? `<img class="demo-gif" src="media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
+    <div class="pl-fig">${it.exId === 'kegel' ? `<div class="kg"><div class="kgfig" id="kgfig" data-m="0">${figure({ poses: KEGEL_MOVES[0][4] })}</div><div class="kg-orb ${P.tRun ? '' : 'rest'}" id="kgorb"></div><div class="kg-word" id="kgw">${P.tRun ? '' : 'Get comfortable'}</div><div class="kg-sub" id="kgs">${P.tRun ? '' : 'Sit or lie down. Tap start when ready.'}</div></div>` : ''}${it.exId === 'kegel' ? '' : MEDIA.has(it.exId) ? `<img class="demo-gif" src="media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
     ${it.sets.length > 1 ? `<div class="setchips">${it.sets.map((s, i) => `<div class="setchip ${s.done ? 'done' : i === setIdx ? 'cur' : ''}"><span>Set ${i + 1}</span><b>${s.done ? s.reps + unitOf(it) : '–'}</b></div>`).join('')}</div>` : ''}
     ${timeSet ? `<div class="bigtime" id="tm">${mmss(P.tRun ? Math.max(0, Math.ceil((P.tEnd - Date.now()) / 1000)) : it.target)}</div>
         <div style="display:flex;justify-content:center;margin:4px 0 8px">${ring(P.tRun ? Math.max(0, (P.tEnd - Date.now()) / 1000 / P.tTotal) : 1, { size: 96, stroke: 7, label: '', sub: '' })}</div>` :
