@@ -155,11 +155,11 @@ Object.assign(GUIDE, {
 
 GUIDE.dbBentRow = GUIDE.dbRow;
 GUIDE.kegel = {
-  intro: 'Strengthens the pelvic-floor muscles that support your bladder and bowel and help core stability. This is a gentle 10-minute guided session. Short squeezes with real rests work better than one long squeeze.',
-  steps: ['Sit upright in a chair, or lie on your back with your knees bent. Relax your belly, thighs and bottom.', 'Find the right muscles once: imagine stopping yourself from passing wind, or stopping urine mid-flow. The gentle lift you feel inside is the pelvic floor. Do not practise by actually stopping urine.', 'When the screen says SQUEEZE, gently lift and tighten those muscles, as if lifting something up and in. Use about 30–40% effort, not maximum.', 'When it says RELAX, let go completely. The relaxing part matters as much as the squeeze.', 'Keep breathing normally throughout. The timer guides you through slow holds, longer holds and quick flicks, with rests in between.'],
-  breathe: 'Breathe normally. Never hold your breath. Try breathing out gently as you squeeze.', feel: 'A subtle inward and upward lift between your pubic bone and tailbone.',
-  mistakes: ['Squeezing your buttocks, thighs or belly instead. Those should stay soft.', 'Holding your breath.', 'Squeezing too hard or never fully relaxing. This can make the muscles tight and tired.', 'Pushing down instead of lifting up.', 'Doing it to the point of pain.'],
-  easier: 'Use gentler squeezes and shorter holds, or stop after the first section. A comfortable 5 minutes is fine.',
+  intro: 'A 10-minute pelvic-floor workout done in a set order: Butterfly beats, Kegel bridge, Diamond leg raises, Kneeling hip thrust, then Crab breathing, 2 minutes each. Start with the easiest, lying-down move and finish with the hardest.',
+  steps: ['Find the right muscles once: imagine stopping yourself from passing wind. The gentle inward-and-upward lift you feel is the pelvic floor. Do not practise by actually stopping urine.', 'When the screen says SQUEEZE, gently lift those muscles at about 30–40% effort. When it says RELAX, let go completely.', 'Butterfly beats: lie on your back, soles together, knees open. Squeeze as you gently flutter or lift your knees, relax as they open.', 'Kegel bridge: lie on your back, knees bent. Lift your hips into a bridge as you squeeze, lower as you relax.', 'Diamond leg raises: lie on your back with legs raised and knees apart in a diamond. Squeeze as you lift, relax as you lower.', 'Kneeling hip thrust: kneel tall, then push your hips forward as you squeeze, and ease back as you relax.', 'Crab breathing: sit in a crab position with hips lifted. Breathe slowly and squeeze gently as you breathe out.'],
+  breathe: 'Breathe normally. Never hold your breath. Breathe out as you squeeze.', feel: 'A subtle inward and upward lift between your pubic bone and tailbone.',
+  mistakes: ['Squeezing your buttocks, thighs or belly instead. Those should stay soft.', 'Holding your breath.', 'Squeezing too hard or never fully relaxing.', 'Pushing down instead of lifting up.', 'Continuing through pain.'],
+  easier: 'Do each move more slowly with gentler squeezes, or do the lying-down moves only.',
   stop: 'Stop if you feel pelvic or lower-back pain. If you have ongoing pelvic pain, leaking, or are unsure you are doing it right, a doctor or pelvic-floor physiotherapist can check.' };
 
 const li = a => a.map(x => `<li>${x}</li>`).join('');
@@ -179,7 +179,7 @@ export function guideHtml(ex, esc, { first = true } = {}) {
 // Short on-screen cues are derived from the detailed steps, so the two can never disagree.
 export function shortCues(ex, n = 3) {
   const g = GUIDE[ex.id];
-  if (!g) return ex.cues;
+  if (!g || ex.id === 'kegel') return ex.cues;
   const clip = s => { let t = s.split(/(?<=[.!?])\s/)[0].split(' — ')[0].replace(/\.$/, ''); if (t.length > 70) { const m = t.match(/^(.{25,70}?)(,| until | so | as if )/); if (m) t = m[1]; } return t; };
   return g.steps.slice(0, n).map(clip);
 }

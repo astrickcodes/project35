@@ -3,18 +3,22 @@ import { EX } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
 import { guideHtml, shortCues, videoUrl, MEDIA } from './guide.js';
 
-// Guided 10-minute Kegel protocol: [label, sub, seconds, kind] — kind: on | off | flick | rest
+// Guided 10-minute Kegel workout, in order: 5 moves x 2 min. Each seg: w=big word, s=sub text, d=seconds, k=orb style.
+const KEGEL_MOVES = [
+  ['Butterfly beats', 'Lie on your back, soles together, knees open', 3, 3],
+  ['Kegel bridge', 'Lie with knees bent, feet flat, hips lifted', 6, 4],
+  ['Diamond leg raises', 'Lie on your back, legs lifted in a diamond shape', 4, 4],
+  ['Kneeling hip thrust', 'Kneel tall, hips forward as you squeeze', 4, 4],
+  ['Crab breathing', 'Sit in crab position, hips lifted, breathe slowly', 6, 4],
+];
 function kegelSegs() {
   const S = [], add = (w, s, d, k) => S.push({ w, s, d, k });
-  add('Relax', 'Settle in. Breathe slowly. Soften belly, thighs and bottom.', 40, 'off');
-  for (let i = 1; i <= 12; i++) { add('Squeeze', `Slow hold · ${i} of 12 · lift gently, keep breathing`, 5, 'on'); add('Relax', 'Let go completely', 5, 'off'); }
-  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
-  for (let i = 1; i <= 8; i++) { add('Squeeze', `Long hold · ${i} of 8 · keep breathing`, 8, 'on'); add('Relax', 'Let go completely', 8, 'off'); }
-  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
-  for (let s = 1; s <= 3; s++) { for (let i = 1; i <= 10; i++) { add('Flick', `Quick flicks · set ${s} of 3 · squeeze and release fast`, 1, 'flick'); add('Release', `Quick flicks · set ${s} of 3`, 1, 'flickoff'); } if (s < 3) add('Rest', 'Breathe and stay relaxed', 15, 'rest'); }
-  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
-  for (let i = 1; i <= 10; i++) { add('Squeeze', `Slow hold · ${i} of 10 · lift gently, keep breathing`, 6, 'on'); add('Relax', 'Let go completely', 6, 'off'); }
-  add('Relax', 'Well done. Breathe slowly and relax fully.', 42, 'off');
+  KEGEL_MOVES.forEach(([name, setup, on, off], n) => {
+    add('Get ready', `${n + 1} of 5 · ${name} · ${setup}`, 10, 'rest');
+    const reps = Math.floor(104 / (on + off));
+    for (let r = 1; r <= reps; r++) { add('Squeeze', `${n + 1} of 5 · ${name} · ${r}/${reps}`, on, 'on'); add('Relax', `${n + 1} of 5 · ${name}`, off, 'off'); }
+    const used = 10 + reps * (on + off); if (used < 120) add('Relax', `${n + 1} of 5 · ${name} · breathe`, 120 - used, 'off');
+  });
   return S;
 }
 const KEGEL_SEGS = kegelSegs(), KEGEL_TOTAL = KEGEL_SEGS.reduce((a, s) => a + s.d, 0);
@@ -45,6 +49,17 @@ export function openPlayer(ctx, plan) {
   root().hidden = false;
   clearInterval(tickId); tickId = setInterval(tick, 250);
   autoStart(); draw();
+  try { history.pushState({ pl: 1 }, ''); } catch (e) {}
+}
+export const playerOpen = () => !!P;
+export function playerBack() {
+  if (!P) return false;
+  const ov = document.querySelector('#player .pause-ov');
+  if (ov) { ov.remove(); if (P.paused) resume(); }
+  else if (P.phase === 'summary') { close(); return true; }
+  else quitMenu();
+  try { history.pushState({ pl: 1 }, ''); } catch (e) {}
+  return true;
 }
 
 function build(plan) {
@@ -180,7 +195,8 @@ function feel(v) {
 function close() {
   clearInterval(tickId); tickId = null; wake?.release?.().catch(() => {}); wake = null;
   document.body.style.overflow = ''; root().hidden = true; root().innerHTML = '';
-  P = null; C.onClose?.();
+  P = null; if (history.state?.pl) history.back();
+  C.onClose?.();
 }
 function quitMenu() {
   P.paused || pause();

@@ -2,7 +2,7 @@
 import * as E from './engine.js';
 import { EX, FOCUS, CHAIN_LABEL } from './data.js';
 import { icon, esc, figure, lineChart, barChart, ring, HABIT_ICONS, load, save, DEFAULT_HABITS, defaultState, photoPut, photoDel, photoAll, resizeImage } from './lib.js';
-import { openPlayer } from './player.js';
+import { openPlayer, playerBack, playerOpen } from './player.js';
 
 let S = load();
 let view = 'today';
@@ -22,12 +22,12 @@ function applyTheme() {
   document.querySelector('meta[name=theme-color]').content = S.settings.theme === 'light' ? '#f3f5f3' : '#121513';
 }
 function sheet(html, onClose) {
-  const w = $('#sheet'); w.hidden = false;
+  const w = $('#sheet'); if (w.hidden) { try { history.pushState({ sh: 1 }, ''); } catch (e) {} } w.hidden = false;
   w.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
   w.onclick = e => { if (e.target === w) closeSheet(); };
   w._onClose = onClose;
 }
-function closeSheet() { const w = $('#sheet'); w.hidden = true; w.innerHTML = ''; w._onClose?.(); w._onClose = null; }
+function closeSheet(fromPop) { const w = $('#sheet'); w.hidden = true; w.innerHTML = ''; w._onClose?.(); w._onClose = null; if (!fromPop && history.state?.sh) history.back(); }
 const fmtDate = (d, o = { weekday: 'long', day: 'numeric', month: 'long' }) => E.parse(d).toLocaleDateString('en-GB', o);
 const fmtMin = s => `${Math.max(1, Math.round(s / 60))} min`;
 const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
@@ -36,7 +36,15 @@ const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(+n.toFixed(1));
 
 // ---------- routing & rendering
 const NAV = [['today', 'Today', 'home'], ['habits', 'Habits', 'habits'], ['progress', 'Progress', 'progress'], ['settings', 'Settings', 'settings']];
-function go(v) { view = v; render(); window.scrollTo(0, 0); }
+function go(v) { if (v !== view) { try { history.pushState({ v }, ''); } catch (e) {} } view = v; render(); window.scrollTo(0, 0); }
+// Back button / swipe: close player layers, then sheets, then step back through visited tabs.
+window.addEventListener('popstate', e => {
+  if (playerOpen()) { playerBack(); return; }
+  const sh = $('#sheet');
+  if (sh && !sh.hidden) { closeSheet(true); render(); return; }
+  const v = e.state?.v; if (v && NAV.some(n => n[0] === v)) { view = v; render(); window.scrollTo(0, 0); }
+});
+try { history.replaceState({ v: view }, ''); } catch (e) {}
 function render() {
   applyTheme();
   if (!S.onboarded) { navEl.classList.add('hide'); return renderOnboarding(); }
