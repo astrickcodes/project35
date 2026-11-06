@@ -1,7 +1,7 @@
 // Interactive workout player: single overlay screen — demo, sets, rest timer, pause, summary.
 import { EX } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
-import { guideHtml } from './guide.js';
+import { guideHtml, shortCues, videoUrl } from './guide.js';
 
 let C = null, P = null, tickId = null, wake = null, audio = null;
 const root = () => document.getElementById('player');
@@ -207,7 +207,7 @@ function draw() {
        <p class="muted small" style="text-align:center;margin-top:-6px">Reps you actually completed${uni}</p>`}
     ${it.load ? `<div class="weight-in"><button class="icon-btn" data-p="wt-" aria-label="Lighter">${icon('minus', 20)}</button><input id="wt" type="number" step="0.5" inputmode="decimal" placeholder="kg" value="${P.weight ?? ''}" aria-label="Dumbbell weight in kg"><span class="muted">kg each</span><button class="icon-btn" data-p="wt+" aria-label="Heavier">${icon('plus', 20)}</button></div>
       <p class="hint" style="text-align:center;margin:-4px 0 8px">${it.loadUp ? 'You’ve earned a heavier dumbbell — go up one small step. ' : P.weight ? '' : 'Pick a load that leaves 2–3 reps in reserve. '}</p>` : ''}
-    <ul class="cues">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+    <ul class="cues">${shortCues(ex).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
     <button class="btn sec sm info-btn" data-p="info">${icon('info', 18)} How to do it · full details</button>
     <div class="pl-bottom">
       ${timeSet ? (P.tRun ? `<button class="btn xl" data-p="finish-early">${icon('check', 22)} Finish now</button>` : `<button class="btn xl" data-p="start-timer">${icon('play', 22)} Start ${it.target}s timer</button>${prep ? '' : `<button class="btn sec" data-p="manual">I did it — log ${it.target}s</button>`}`)
@@ -261,7 +261,7 @@ document.addEventListener('click', e => {
     case 'info': { P.paused || pause(); const ov = document.createElement('div'); ov.className = 'pause-ov info-ov'; ov.id = 'infov';
       const seen = (C.S.workouts || []).some(w => w.items?.some(i => i.exId === it.exId));
       ov.innerHTML = `<div class="info-sheet"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">${esc(EX[it.exId].name)}</h2><button class="icon-btn" data-p="infoclose" aria-label="Close">${icon('close', 20)}</button></div>
-        ${guideHtml(EX[it.exId], esc, { first: true })}<button class="btn xl" data-p="infoclose" style="margin-top:14px">Got it</button></div>`; root().appendChild(ov); } break;
+        <a class="btn sec sm vid-btn" href="${videoUrl(EX[it.exId])}" target="_blank" rel="noopener">▶ Watch a video demo (needs internet)</a>${guideHtml(EX[it.exId], esc, { first: true })}<button class="btn xl" data-p="infoclose" style="margin-top:14px">Got it</button></div>`; root().appendChild(ov); } break;
     case 'infoclose': document.getElementById('infov')?.remove(); resume(); break;
     case 'opts': { P.paused || pause(); const ov = document.createElement('div'); ov.className = 'pause-ov'; ov.id = 'optsv';
       ov.innerHTML = `<h2>${esc(EX[it.exId].name)}</h2><div class="col" style="width:100%;max-width:340px">${it.role === 'main' && !it.sets.some(s => s.done) ? '<button class="btn sec" data-p="easier">Too hard? Easier version</button>' : ''}<button class="btn sec" data-p="skip">Skip this exercise</button>${it.role === 'main' ? '<button class="btn sec" data-p="addset">+ Add a set</button><button class="btn sec" data-p="dropset">− Remove last set</button>' : ''}<button class="btn" data-p="optsclose">Back to workout</button></div>`;

@@ -167,3 +167,12 @@ export function guideHtml(ex, esc, { first = true } = {}) {
     ${sec('Common mistakes', `<ul class="mist">${li(g.mistakes.map(esc))}</ul>`, first)}
     ${sec('Too hard? Make it easier', `<p>${esc(g.easier)}</p>${g.stop ? `<p class="stop">${esc(g.stop)}</p>` : ''}`, first)}`;
 }
+
+// Short on-screen cues are derived from the detailed steps, so the two can never disagree.
+export function shortCues(ex, n = 3) {
+  const g = GUIDE[ex.id];
+  if (!g) return ex.cues;
+  const clip = s => { let t = s.split(/(?<=[.!?])\s/)[0].split(' — ')[0].replace(/\.$/, ''); if (t.length > 70) { const m = t.match(/^(.{25,70}?)(,| until | so | as if )/); if (m) t = m[1]; } return t; };
+  return g.steps.slice(0, n).map(clip);
+}
+export const videoUrl = ex => `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' proper form for beginners')}`;
