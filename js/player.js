@@ -1,7 +1,7 @@
 // Interactive workout player: single overlay screen — demo, sets, rest timer, pause, summary.
 import { EX } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
-import { guideHtml, shortCues, videoUrl } from './guide.js';
+import { guideHtml, shortCues, videoUrl, MEDIA } from './guide.js';
 
 let C = null, P = null, tickId = null, wake = null, audio = null;
 const root = () => document.getElementById('player');
@@ -199,7 +199,7 @@ function draw() {
     <h1 class="pl-name">${esc(ex.name)}</h1>
     <div class="pl-target">${it.sets.length > 1 ? `${it.sets.length} sets × ` : ''}${it.target}${timeSet ? ' sec' : ' reps'}${uni}${it.role === 'main' ? ` · rest ${it.rest}s` : ''}${it.swapped ? ' · <span class="accent">easier version</span>' : ''}</div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${chips(ex)}</div>
-    <div class="pl-fig">${figure(ex)}</div>
+    <div class="pl-fig">${MEDIA.has(it.exId) ? `<img class="demo-gif" src="media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
     ${it.sets.length > 1 ? `<div class="setchips">${it.sets.map((s, i) => `<div class="setchip ${s.done ? 'done' : i === setIdx ? 'cur' : ''}"><span>Set ${i + 1}</span><b>${s.done ? s.reps + unitOf(it) : '–'}</b></div>`).join('')}</div>` : ''}
     ${timeSet ? `<div class="bigtime" id="tm">${mmss(P.tRun ? Math.max(0, Math.ceil((P.tEnd - Date.now()) / 1000)) : it.target)}</div>
         <div style="display:flex;justify-content:center;margin:4px 0 8px">${ring(P.tRun ? Math.max(0, (P.tEnd - Date.now()) / 1000 / P.tTotal) : 1, { size: 96, stroke: 7, label: '', sub: '' })}</div>` :

@@ -176,3 +176,6 @@ export function shortCues(ex, n = 3) {
   return g.steps.slice(0, n).map(clip);
 }
 export const videoUrl = ex => `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' proper form for beginners')}`;
+
+// Animated demos (180x180 GIFs, © Gym visual — https://gymvisual.com/). Exercises not listed use the drawn figure.
+export const MEDIA = new Set(["assistedPull", "bridge", "burpee", "calfRaise", "chinUp", "dbBentRow", "dbCurl", "dbPress", "dbRdl", "dbRow", "deadBug", "decline", "diamond", "gobletSquat", "inchworm", "inclinePush", "jumpSquat", "kneePush", "mountain", "pullup", "pushup", "scapPull", "scapPushup", "slBridge", "tableRow", "wallPush", "worldGreatest"]);

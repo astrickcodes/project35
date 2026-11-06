@@ -264,3 +264,5 @@ input::placeholder,textarea::placeholder{color:var(--dim)}
 .pl .bigtime{font-size:44px;line-height:1.05}.pl .bigtime+div{display:none!important}
 
 .vid-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;margin:10px 0 4px;width:100%}
+
+.pl-fig{position:relative}.demo-gif{max-height:100%;height:100%;width:auto;max-width:100%;object-fit:contain;border-radius:14px;background:#fff}.pl-fig .credit{position:absolute;right:10px;bottom:6px;font-size:9px;color:var(--mute);opacity:.8}
