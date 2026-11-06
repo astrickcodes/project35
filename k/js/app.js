@@ -2,7 +2,7 @@
 import * as E from './engine.js';
 import { EX, FOCUS, CHAIN_LABEL } from './data.js';
 import { icon, esc, figure, lineChart, barChart, ring, HABIT_ICONS, load, save, DEFAULT_HABITS, defaultState, photoPut, photoDel, photoAll, resizeImage } from './lib.js';
-import { openPlayer } from './player.js';
+import { openPlayer, playerBack, playerOpen } from './player.js';
 
 let S = load();
 // Optional display name comes only from the link fragment (#Name), which is never sent to the server; kept on this device.
@@ -28,12 +28,12 @@ function applyTheme() {
   document.querySelector('meta[name=theme-color]').content = S.settings.theme === 'light' ? '#fbf5f7' : '#161114';
 }
 function sheet(html, onClose) {
-  const w = $('#sheet'); w.hidden = false;
+  const w = $('#sheet'); if (w.hidden) { try { history.pushState({ sh: 1 }, ''); } catch (e) {} } w.hidden = false;
   w.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
   w.onclick = e => { if (e.target === w) closeSheet(); };
   w._onClose = onClose;
 }
-function closeSheet() { const w = $('#sheet'); w.hidden = true; w.innerHTML = ''; w._onClose?.(); w._onClose = null; }
+function closeSheet(fromPop) { const w = $('#sheet'); w.hidden = true; w.innerHTML = ''; w._onClose?.(); w._onClose = null; if (!fromPop && history.state?.sh) history.back(); }
 const fmtDate = (d, o = { weekday: 'long', day: 'numeric', month: 'long' }) => E.parse(d).toLocaleDateString('en-GB', o);
 const fmtMin = s => `${Math.max(1, Math.round(s / 60))} min`;
 const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
@@ -42,7 +42,15 @@ const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(+n.toFixed(1));
 
 // ---------- routing & rendering
 const NAV = [['today', 'Today', 'home'], ['habits', 'Habits', 'habits'], ['progress', 'Progress', 'progress'], ['settings', 'Settings', 'settings']];
-function go(v) { view = v; render(); window.scrollTo(0, 0); }
+function go(v) { if (v !== view) { try { history.pushState({ v }, ''); } catch (e) {} } view = v; render(); window.scrollTo(0, 0); }
+// Back button / swipe: close player layers, then sheets, then step back through visited tabs.
+window.addEventListener('popstate', e => {
+  if (playerOpen()) { playerBack(); return; }
+  const sh = $('#sheet');
+  if (sh && !sh.hidden) { closeSheet(true); render(); return; }
+  const v = e.state?.v; if (v && NAV.some(n => n[0] === v)) { view = v; render(); window.scrollTo(0, 0); }
+});
+try { history.replaceState({ v: view }, ''); } catch (e) {}
 function render() {
   applyTheme();
   if (!S.onboarded) { navEl.classList.add('hide'); return renderOnboarding(); }
@@ -211,6 +219,7 @@ function workoutCard(plan, done, resumable) {
       `<button class="btn xl" data-act="start">${icon('play', 22)} ${resumable ? 'Resume workout' : rest ? 'Optional gentle stretching' : isTrain ? 'Start workout' : 'Start session'}</button>
        ${resumable ? '<button class="btn ghost" data-act="discard-session">Discard saved progress</button>' : ''}
        <div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap">${rest ? '' : `<button class="btn ghost sm" data-act="plan-edit">Edit / skip exercises</button>`}<button class="btn ghost sm" data-act="change-focus">Different session</button></div>`}
+       <button class="btn sec" data-act="kegel">${S.kegel?.[todayStr()] ? '✓ Kegel done today · do again' : 'Daily Kegel · 10 min'}</button>
     </div></section>`;
 }
 
@@ -469,6 +478,7 @@ const A = {
     render();
   },
   'checkin-edit': () => { S.checkins[todayStr()] = {}; persist(); render(); },
+  kegel: () => { const t = todayStr(); runPlayer({ date: t, extra: true, kegelOnly: true, kind: 'train', focus: 'kegel', title: 'Kegel session', warm: [], main: [], mob: [], cool: [] }); },
   start: () => { const t = todayStr(); const plan = E.planFor(S, t); if (plan.kind === 'rest') return A['extra-mobility'](); runPlayer(plan); },
   'extra-mobility': () => { const t = todayStr(); const rec = E.buildPlan(S, t, { forceFocus: 'recovery' }); rec.title = 'Gentle stretch'; rec.main = rec.main.filter(i => i.exId !== 'walkGentle').slice(0, 5); rec.warm = []; rec.mob = []; rec.cool = []; rec.extra = true; runPlayer(rec); },
   'sheet-close': () => { closeSheet(); render(); },

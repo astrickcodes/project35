@@ -1,7 +1,43 @@
 // Interactive workout player: single overlay screen — demo, sets, rest timer, pause, summary.
-import { EX } from './data.js';
+import { EX, POSES } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
+import { guideHtml, shortCues, videoUrl, MEDIA } from './guide.js';
 
+// Guided 10-minute Kegel workout, in order: 5 moves x 2 min. Each seg: w=big word, s=sub text, d=seconds, k=orb style.
+const KEGEL_MOVES = [
+  ['Butterfly beats', 'Sit upright, soles together, hands on feet, knees flap like wings', 3, 3, ['kgBfA', 'kgBfB']],
+  ['Kegel bridge', 'Lie on your back, knees bent, hands behind head, lift hips', 6, 4, ['kgBrA', 'kgBrB']],
+  ['Diamond leg raises', 'Lean back on your hands, lift and lower your legs', 4, 4, ['kgDiaA', 'kgDiaB']],
+  ['Kneeling hip thrust', 'On knees and forearms, hips thrust forward and down', 4, 4, ['kgKneelA', 'kgKneelB']],
+  ['Crab breathing', 'Crab position, hips lifted, breathe slowly', 6, 4, ['kgCrabA', 'kgCrabB']],
+];
+function kegelSegs() {
+  let mv = 0; const S = [], add = (w, s, d, k) => S.push({ w, s, d, k, m: mv });
+  KEGEL_MOVES.forEach(([name, setup, on, off], n) => { mv = n;
+    add('Get ready', `${n + 1} of 5 · ${name} · ${setup}`, 10, 'rest');
+    const reps = Math.floor(104 / (on + off));
+    for (let r = 1; r <= reps; r++) { add('Squeeze', `${n + 1} of 5 · ${name} · ${r}/${reps}`, on, 'on'); add('Relax', `${n + 1} of 5 · ${name}`, off, 'off'); }
+    const used = 10 + reps * (on + off); if (used < 120) add('Relax', `${n + 1} of 5 · ${name} · breathe`, 120 - used, 'off');
+  });
+  return S;
+}
+const KEGEL_SEGS = kegelSegs(), KEGEL_TOTAL = KEGEL_SEGS.reduce((a, s) => a + s.d, 0);
+const kegelItem = () => ({ exId: 'kegel', type: 'time', target: KEGEL_TOTAL, sets: 1, role: 'prep' });
+function kegelFig(names) {
+  const ps = names.map(n => POSES[n]); let x0 = 999, y0 = 999, x1 = -999, y1 = -999;
+  ps.forEach(q => Object.values(q).forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
+  const gy = y1 + 3; y1 = gy; let h = Math.max(y1 - y0 + 22, 60), w = Math.max(x1 - x0 + 40, h * 1.5);
+  const cx = (x0 + x1) / 2, vb = `${(cx - w / 2).toFixed(1)} ${(y1 + 8 - h).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
+  return figure({ poses: names, name: 'Kegel move' }).replace('viewBox="0 0 200 110"', `viewBox="${vb}"`).replace(/<line class="ground"[^>]*>/, `<line class="ground" x1="${(cx - w / 2 + 4).toFixed(1)}" y1="${gy}" x2="${(cx + w / 2 - 4).toFixed(1)}" y2="${gy}"/>`);
+}
+function kegelUI(rem) {
+  const el = KEGEL_TOTAL - Math.max(0, rem); let acc = 0, seg = KEGEL_SEGS[KEGEL_SEGS.length - 1], idx = KEGEL_SEGS.length - 1;
+  for (let i = 0; i < KEGEL_SEGS.length; i++) { acc += KEGEL_SEGS[i].d; if (el < acc) { seg = KEGEL_SEGS[i]; idx = i; break; } }
+  if (P.kgIdx !== idx) { if (P.kgIdx !== undefined && !seg.k.startsWith('flick')) beep(false); P.kgIdx = idx; }
+  const f = document.getElementById('kgfig'); if (f && f.dataset.m != seg.m) { f.dataset.m = seg.m; f.innerHTML = kegelFig(KEGEL_MOVES[seg.m][4]); }
+  const w = document.getElementById('kgw'), s = document.getElementById('kgs'), o = document.getElementById('kgorb');
+  if (w) w.textContent = seg.w; if (s) s.textContent = seg.s; if (o) o.className = 'kg-orb ' + seg.k;
+}
 let C = null, P = null, tickId = null, wake = null, audio = null;
 const root = () => document.getElementById('player');
 const cur = () => P.steps[P.i];
@@ -21,6 +57,17 @@ export function openPlayer(ctx, plan) {
   root().hidden = false;
   clearInterval(tickId); tickId = setInterval(tick, 250);
   autoStart(); draw();
+  try { history.pushState({ pl: 1 }, ''); } catch (e) {}
+}
+export const playerOpen = () => !!P;
+export function playerBack() {
+  if (!P) return false;
+  const ov = document.querySelector('#player .pause-ov');
+  if (ov) { ov.remove(); if (P.paused) resume(); }
+  else if (P.phase === 'summary') { close(); return true; }
+  else quitMenu();
+  try { history.pushState({ pl: 1 }, ''); } catch (e) {}
+  return true;
 }
 
 function build(plan) {
@@ -30,7 +77,9 @@ function build(plan) {
     ...plan.main.map(it => ({ g: plan.kind === 'train' ? 'Workout' : 'Session', it: mk(it, it.role === 'main' ? 'main' : 'mob') })),
     ...(plan.mob || []).map(it => ({ g: 'Mobility', it: mk(it, 'mob') })),
     ...plan.cool.map(it => ({ g: 'Cool-down', it: mk(it, 'prep') })),
+    ...((plan.kegelOnly || (!plan.extra && plan.kind !== 'rest')) ? [{ g: 'Daily Kegel', it: mk(kegelItem(), 'prep') }] : []),
   ];
+  if (plan.kegelOnly) steps.splice(0, steps.length - 1);
   return { date: plan.date, plan: { focus: plan.focus, title: plan.title, kind: plan.kind }, extra: !!plan.extra, steps, i: 0, set: 0, phase: 'work', activeMs: 0, startedAt: Date.now(), paused: false };
 }
 
@@ -50,7 +99,7 @@ function initWeight() {
 }
 function autoStart() {
   const st = cur(), prev = P.steps[P.i - 1];
-  if (st.it.type === 'time' && isPrep(st) && prev && isPrep(prev)) startTimer();
+  if (st.it.type === 'time' && st.it.exId !== 'kegel' && isPrep(st) && prev && isPrep(prev)) startTimer();
 }
 function startTimer() {
   const it = cur().it; P.tTotal = it.target; P.tEnd = Date.now() + it.target * 1000; P.tRun = true; P.tStart = Date.now();
@@ -66,7 +115,7 @@ function tick() {
   if (P.phase === 'work' && P.tRun) {
     const rem = Math.ceil((P.tEnd - now) / 1000);
     if (rem !== P.lastShown) { if (rem <= 3 && rem > 0) beep(false); P.lastShown = rem; }
-    setTimerUI(rem, P.tTotal);
+    setTimerUI(rem, P.tTotal); if (cur().it.exId === 'kegel') kegelUI((P.tEnd - now) / 1000);
     if (P.tEnd - now <= 0) { beep(true); completeSet(cur().it.target); }
   } else if (P.phase === 'rest') {
     const rem = Math.ceil((P.restEnd - now) / 1000);
@@ -86,6 +135,7 @@ function completeSet(reps) {
   const st = cur(), it = st.it;
   it.sets[P.set] = { reps: Math.max(0, Math.round(reps)), done: true, workSec: Math.max(1, Math.round((P.activeMs - (P.setAct || 0)) / 1000)) };
   if (it.load && +P.weight > 0) it.sets[P.set].weight = +P.weight;
+  if (it.exId === 'kegel' && reps >= 300) { (C.S.kegel ||= {})[P.date] = true; }
   stopTimer();
   const lastSet = P.set >= it.sets.length - 1;
   let next = null;
@@ -153,7 +203,8 @@ function feel(v) {
 function close() {
   clearInterval(tickId); tickId = null; wake?.release?.().catch(() => {}); wake = null;
   document.body.style.overflow = ''; root().hidden = true; root().innerHTML = '';
-  P = null; C.onClose?.();
+  P = null; if (history.state?.pl) history.back();
+  C.onClose?.();
 }
 function quitMenu() {
   P.paused || pause();
@@ -198,7 +249,7 @@ function draw() {
     <h1 class="pl-name">${esc(ex.name)}</h1>
     <div class="pl-target">${it.sets.length > 1 ? `${it.sets.length} sets × ` : ''}${it.target}${timeSet ? ' sec' : ' reps'}${uni}${it.role === 'main' ? ` · rest ${it.rest}s` : ''}${it.swapped ? ' · <span class="accent">easier version</span>' : ''}</div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${chips(ex)}</div>
-    <div class="pl-fig">${figure(ex)}</div>
+    <div class="pl-fig">${it.exId === 'kegel' ? `<div class="kg"><div class="kgfig" id="kgfig" data-m="0">${kegelFig(KEGEL_MOVES[0][4])}</div><div class="kg-orb ${P.tRun ? '' : 'rest'}" id="kgorb"></div><div class="kg-word" id="kgw">${P.tRun ? '' : 'Get comfortable'}</div><div class="kg-sub" id="kgs">${P.tRun ? '' : 'Sit or lie down. Tap start when ready.'}</div></div>` : ''}${it.exId === 'kegel' ? '' : MEDIA.has(it.exId) ? `<img class="demo-gif" src="../media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
     ${it.sets.length > 1 ? `<div class="setchips">${it.sets.map((s, i) => `<div class="setchip ${s.done ? 'done' : i === setIdx ? 'cur' : ''}"><span>Set ${i + 1}</span><b>${s.done ? s.reps + unitOf(it) : '–'}</b></div>`).join('')}</div>` : ''}
     ${timeSet ? `<div class="bigtime" id="tm">${mmss(P.tRun ? Math.max(0, Math.ceil((P.tEnd - Date.now()) / 1000)) : it.target)}</div>
         <div style="display:flex;justify-content:center;margin:4px 0 8px">${ring(P.tRun ? Math.max(0, (P.tEnd - Date.now()) / 1000 / P.tTotal) : 1, { size: 96, stroke: 7, label: '', sub: '' })}</div>` :
@@ -206,7 +257,8 @@ function draw() {
        <p class="muted small" style="text-align:center;margin-top:-6px">Reps you actually completed${uni}</p>`}
     ${it.load ? `<div class="weight-in"><button class="icon-btn" data-p="wt-" aria-label="Lighter">${icon('minus', 20)}</button><input id="wt" type="number" step="0.5" inputmode="decimal" placeholder="kg" value="${P.weight ?? ''}" aria-label="Dumbbell weight in kg"><span class="muted">kg each</span><button class="icon-btn" data-p="wt+" aria-label="Heavier">${icon('plus', 20)}</button></div>
       <p class="hint" style="text-align:center;margin:-4px 0 8px">${it.loadUp ? 'You’ve earned a heavier dumbbell — go up one small step. ' : P.weight ? '' : 'Pick a load that leaves 2–3 reps in reserve. '}</p>` : ''}
-    <ul class="cues">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+    <ul class="cues">${shortCues(ex).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+    <button class="btn sec sm info-btn" data-p="info">${icon('info', 18)} How to do it · full details</button>
     <div class="pl-bottom">
       ${timeSet ? (P.tRun ? `<button class="btn xl" data-p="finish-early">${icon('check', 22)} Finish now</button>` : `<button class="btn xl" data-p="start-timer">${icon('play', 22)} Start ${it.target}s timer</button>${prep ? '' : `<button class="btn sec" data-p="manual">I did it — log ${it.target}s</button>`}`)
         : `<button class="btn xl" data-p="done-set">${icon('check', 22)} Complete set ${setIdx + 1}</button>`}
@@ -256,6 +308,11 @@ document.addEventListener('click', e => {
     case 'rest+': P.restEnd += 15000; P.restTotal += 15; break;
     case 'prev': jump(P.i - 1); break;
     case 'next': jump(P.i + 1); break;
+    case 'info': { P.paused || pause(); const ov = document.createElement('div'); ov.className = 'pause-ov info-ov'; ov.id = 'infov';
+      const seen = (C.S.workouts || []).some(w => w.items?.some(i => i.exId === it.exId));
+      ov.innerHTML = `<div class="info-sheet"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">${esc(EX[it.exId].name)}</h2><button class="icon-btn" data-p="infoclose" aria-label="Close">${icon('close', 20)}</button></div>
+        <a class="btn sec sm vid-btn" href="${videoUrl(EX[it.exId])}" target="_blank" rel="noopener">▶ Watch a video demo (needs internet)</a>${guideHtml(EX[it.exId], esc, { first: true })}<button class="btn xl" data-p="infoclose" style="margin-top:14px">Got it</button></div>`; root().appendChild(ov); } break;
+    case 'infoclose': document.getElementById('infov')?.remove(); resume(); break;
     case 'opts': { P.paused || pause(); const ov = document.createElement('div'); ov.className = 'pause-ov'; ov.id = 'optsv';
       ov.innerHTML = `<h2>${esc(EX[it.exId].name)}</h2><div class="col" style="width:100%;max-width:340px">${it.role === 'main' && !it.sets.some(s => s.done) ? '<button class="btn sec" data-p="easier">Too hard? Easier version</button>' : ''}<button class="btn sec" data-p="skip">Skip this exercise</button>${it.role === 'main' ? '<button class="btn sec" data-p="addset">+ Add a set</button><button class="btn sec" data-p="dropset">− Remove last set</button>' : ''}<button class="btn" data-p="optsclose">Back to workout</button></div>`;
       root().appendChild(ov); break; }

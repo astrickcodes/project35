@@ -38,6 +38,16 @@ const bicB = { ...dbA, K:[130,86], F:[158,90], K2:[116,66], F2:[140,70], E:[44,7
 const hollowA = { H:[40,84], S:[56,86], P:[100,92], K:[130,76], F:[150,86], E:[44,66], W:[34,52] };
 const hollowB = { H:[34,80], S:[50,78], P:[100,90], K:[135,84], F:[165,76], E:[36,64], W:[22,52] };
 const vupB = { H:[70,42], S:[70,52], P:[100,90], K:[130,60], F:[150,34], E:[100,60], W:[130,40] };
+const kgBfA = { H:[99,50], S:[98,64], P:[90,94], K:[126,74], F:[106,97], E:[112,82], W:[108,95] };
+const kgBfB = { ...kgBfA, K:[130,92] };
+const kgBrA = { H:[24,90], S:[40,92], P:[90,92], K:[130,66], F:[150,92], E:[34,74], W:[26,86] };
+const kgBrB = { ...kgBrA, P:[90,62], S:[40,88], H:[24,86], E:[34,70], W:[26,82] };
+const kgDiaA = { H:[48,60], S:[58,70], P:[92,94], K:[126,72], F:[156,56], E:[60,88], W:[58,98] };
+const kgDiaB = { H:[48,60], S:[58,70], P:[92,94], K:[126,90], F:[158,86], E:[60,88], W:[58,98] };
+const kgKneelA = { H:[134,70], S:[120,68], P:[78,62], K:[70,92], F:[40,100], E:[136,86], W:[154,98] };
+const kgKneelB = { H:[135,82], S:[122,84], P:[92,82], K:[74,94], F:[44,100], E:[138,94], W:[156,98] };
+const kgCrabA = { H:[48,70], S:[62,64], P:[100,86], K:[124,64], F:[138,98], E:[60,82], W:[58,98] };
+const kgCrabB = { H:[46,68], S:[62,60], P:[100,62], K:[124,48], F:[138,98], E:[60,80], W:[58,98] };
 const bridgeA = { H:[24,90], S:[40,92], P:[90,92], K:[130,66], F:[150,92], E:[70,94], W:[100,94] };
 const bridgeB = { ...bridgeA, P:[90,64], S:[40,88], H:[24,86] };
 const slBridgeB = { ...bridgeB, K2:[140,48], F2:[170,34] };
@@ -89,6 +99,7 @@ export const POSES = {
   pressA, pressB, birdB, trA, trB,
   stand, fwd, up, jackOut, jackIn, squatDn, lungeDn, lungeBulg, pushUp, pushDn, kneeUp, kneeDn, incUp, incDn, decUp, decDn,
   wallUp, wallDn, pikeUp, pikeDn, plankA, plankB, sideA, sideB, mtnA, mtnB, dbA, dbB, lrFlat, lrUp, bicA, bicB, hollowA, hollowB,
+  kgBrA, kgBrB, kgBfA, kgBfB, kgDiaA, kgDiaB, kgKneelA, kgKneelB, kgCrabA, kgCrabB,
   vupB, bridgeA, bridgeB, slBridgeB, calfB, wallSitA, wallSitB, dipUp, dipDn, curlA, curlB, rowA, rowB, superA, superB, snowA, snowB,
   hangA, hangHalf, pullTop, burpeeLow, kneeHigh, kneeHighB, quadA, quadB, fold, cat, cow, quadAll, childB, cobraB, hipFlexA, hipFlexB,
   wgsB, chestA, chestB, armOut, armCircUp, tabletopRow, tabletopRowB, inchA, inchB,
@@ -240,6 +251,8 @@ add(
    cues:['Slow, deep, pain-free squats.','Chest tall, heels down.','Use this to rehearse form.'] }),
  L('childPose',"Child's pose",{ type:'time', base:40, ceil:40, step:0, groups:['mobility','back'], muscles:'Lower back, lats, hips', poses:['quadAll','childB'], role:'cool',
    cues:['Sit hips back toward your heels.','Arms long in front.','Breathe deep into your back.'] }),
+ L('kegel','Kegel workout',{ type:'time', base:600, ceil:600, step:0, groups:[], muscles:'Pelvic floor', poses:['quadAll','childB'], role:'kegel',
+   cues:['Squeeze gently (30–40% effort), then fully relax.','Keep breathing. Breathe out as you squeeze.','Order: butterfly, bridge, leg raises, hip thrust, crab.'] }),
  L('cobra','Cobra stretch',{ type:'time', base:30, ceil:30, step:0, groups:['mobility','core'], muscles:'Abs, chest, spine', poses:['superA','cobraB'], role:'cool', stress:['back'],
    cues:['Lie face down, hands by your chest.','Press up gently, hips on the floor.','Keep shoulders away from ears.'] }),
  L('hipFlexor','Kneeling hip-flexor stretch',{ type:'time', base:40, ceil:40, step:0, groups:['mobility','legs'], muscles:'Hip flexors, quads', poses:['hipFlexA','hipFlexB'], role:'cool', stress:['knee'],

@@ -213,4 +213,63 @@ input::placeholder,textarea::placeholder{color:var(--dim)}
 .weight-in{display:flex;align-items:center;gap:10px;justify-content:center;margin:2px 0 10px}
 .weight-in input{width:110px;min-height:52px;font-size:20px;text-align:center}
 .rate-row{display:flex;gap:8px;justify-content:center;margin-top:10px}.rate-row button{min-height:44px;padding:0 14px;border-radius:12px;background:var(--card2);font-weight:600;font-size:14px}.rate-row button.on{background:var(--accent);color:var(--accent-ink)}
-.pl-fig{max-height:168px}.pl-fig .fig{max-height:168px;width:100%}
+.pl-fig .fig{max-height:200px;width:100%}
+
+/* --- clearer figures --- */
+.fig .limb{stroke:var(--accent);stroke-linecap:round;fill:none}
+.fig .limb.w13{stroke-width:13}.fig .limb.w9{stroke-width:9}.fig .limb.w8{stroke-width:8}.fig .limb.w7{stroke-width:7}.fig .limb.w6{stroke-width:6}.fig .limb.w5{stroke-width:5}.fig .limb.w4{stroke-width:4}
+.fig .limb.calm{stroke:#6f7f76}.fig .limb.far{opacity:.45}.fig .limb.far.calm{opacity:.35}
+.fig .joint{fill:var(--bg);opacity:.55}.fig .hand{fill:#cfd8d2}
+.fig .dbell{fill:#e9eeea;stroke:#2b3430;stroke-width:2.2}.fig .dbell.far{opacity:.55}
+.fig .head{fill:#cfd8d2}
+.fig .arrow line{stroke:#e9eeea;stroke-width:2;stroke-dasharray:4 3;opacity:.7;stroke-linecap:round}.fig .arrow polygon{fill:#e9eeea;opacity:.8}
+.fig .ground{stroke:var(--line);stroke-width:2}
+.frames{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.frames figure{margin:0;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:6px 6px 8px;text-align:center}
+.frames figcaption{font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+.legend{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--mute);margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+.guide{margin-top:12px}.gd-intro{font-size:17px;line-height:1.45;margin:0 0 10px;color:var(--text)}
+.gd{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-top:8px;padding:0 14px}
+.gd summary{min-height:48px;display:flex;align-items:center;font-weight:700;font-size:16px;cursor:pointer;list-style:none}
+.gd summary::-webkit-details-marker{display:none}.gd summary::after{content:'+';margin-left:auto;color:var(--accent);font-size:22px}.gd[open] summary::after{content:'–'}
+.gd p,.gd li{font-size:17px;line-height:1.5}.gd p{margin:0 0 12px}.gd .stop{color:#ffb86b}
+.steps{margin:0 0 12px;padding-left:22px}.steps li+li{margin-top:10px}.mist{margin:0 0 12px;padding-left:20px}.mist li+li{margin-top:8px}
+.frames .fig{max-height:90px}
+
+.fig.sm{max-height:120px}
+
+.info-ov{align-items:stretch;justify-content:flex-start;overflow:auto;text-align:left;padding:16px}.info-sheet{width:100%;max-width:520px;margin:0 auto;padding-bottom:30px}.info-btn{align-self:center;margin:10px auto 0;width:100%}
+
+/* One-screen workout: no scrolling. The figure flexes to use the leftover space. */
+.pl{height:100dvh;min-height:0;overflow:hidden;padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.pl>*{flex:0 0 auto}
+.pl .pl-fig{flex:1 1 0;min-height:70px;margin:6px 0;padding:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pl .pl-fig .fig{max-height:100%;height:100%;width:100%}
+.pl-name{font-size:24px;margin:2px 0}.pl-target{font-size:16px}
+.pl .row[style*="flex-wrap"]{margin-top:4px!important;gap:4px!important}.pl .row .pill,.pl .chips .pill{font-size:12px;padding:2px 8px}
+.pl .cues{font-size:14px;line-height:1.3;margin:2px 0 0;padding-left:18px}.pl .cues li+li{margin-top:2px}
+.pl .setchips{margin:6px 0;gap:6px}.pl .setchip{padding:4px 2px;font-size:11px}.pl .setchip b{font-size:15px}
+.pl .stepper{margin:2px 0 2px;gap:14px}.pl .stepper button{width:48px;height:48px}.pl .stepper output{font-size:42px;min-width:80px}
+.pl .bigtime{font-size:52px}
+.pl .weight-in{margin:0 0 2px}.pl .weight-in input{min-height:40px;font-size:17px;width:90px}.pl .weight-in .icon-btn{width:40px;height:40px}
+.pl .hint{display:none}.pl p.muted.small{margin:0!important;font-size:12px}
+.pl .info-btn{min-height:40px;margin:6px 0 0;font-size:14px}
+.pl-bottom{position:static;background:none;padding:6px 0 0;gap:6px;margin-top:0}
+.pl-bottom .btn.xl{min-height:52px;font-size:17px}.pl-bottom .btn.sm{min-height:40px}.pl-bottom .btn.ghost{min-height:32px;font-size:13px}
+@media (max-height:700px){.pl-name{font-size:21px}.pl .cues li:nth-child(n+3){display:none}.pl .stepper button{width:42px;height:42px}.pl .stepper output{font-size:34px}}
+
+@media (max-height:700px){.pl .cues,.pl .row[style*="flex-wrap"]{display:none}.pl-top{margin:0}.pl-bottom .btn.xl{min-height:46px}.pl .stepper output{font-size:30px;min-width:60px}.pl .bigtime{font-size:40px}.pl .pl-fig{min-height:60px}.pl-bottom .btn.ghost{min-height:28px}.pl .setchips{margin:3px 0}.pl .weight-in{margin:0}}
+
+.pl .bigtime{font-size:44px;line-height:1.05}.pl .bigtime+div{display:none!important}
+
+.vid-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;margin:10px 0 4px;width:100%}
+
+.pl-fig{position:relative}.demo-gif{max-height:100%;height:100%;width:auto;max-width:100%;object-fit:contain;border-radius:14px;background:#fff}.pl-fig .credit{position:absolute;right:10px;bottom:6px;font-size:9px;color:var(--mute);opacity:.8}
+
+.kg{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:0 12px}
+.kg-orb{width:min(46vw,170px);height:min(46vw,170px);max-height:100%;border-radius:50%;background:var(--accent,#4ade80);opacity:.35;transform:scale(.6);transition:transform .9s ease,opacity .9s ease}
+.kg-orb.on{transform:scale(1);opacity:.95}.kg-orb.flick{transform:scale(1);opacity:.95;transition-duration:.15s}.kg-orb.flickoff{transform:scale(.6);transition-duration:.15s}
+.kg-word{font-size:30px;font-weight:700;letter-spacing:-.02em}.kg-sub{color:var(--mute);font-size:14px;min-height:20px}
+.kgfig{width:100%;max-height:50%;display:flex;justify-content:center}.kgfig svg{max-height:100%;width:auto;max-width:100%}.kg-orb{width:min(26vw,90px)!important;height:min(26vw,90px)!important}
+.kgfig{height:38vh;max-height:none!important;align-items:center}.kgfig svg{height:100%!important;width:100%!important;max-height:none!important}

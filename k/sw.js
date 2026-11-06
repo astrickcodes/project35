@@ -1,6 +1,7 @@
 // Offline-first: precache the app shell, network-first with offline cache fallback.
-const CACHE = 'p35k-v4';
-const SHELL = ['./', 'index.html', 'styles.css', 'manifest.webmanifest', 'js/app.js', 'js/engine.js', 'js/data.js', 'js/lib.js', 'js/player.js', 'icons/icon-maskable-512.png', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
+const CACHE = 'p35k-v5';
+const MEDIA_FILES = ["assistedPull", "bridge", "burpee", "calfRaise", "chinUp", "dbBentRow", "dbCurl", "dbPress", "dbRdl", "dbRow", "deadBug", "decline", "diamond", "gobletSquat", "inchworm", "inclinePush", "jumpSquat", "kneePush", "mountain", "pullup", "pushup", "scapPull", "scapPushup", "slBridge", "tableRow", "wallPush", "worldGreatest"];
+const SHELL = ['./', 'index.html', 'styles.css', 'manifest.webmanifest', 'js/app.js', 'js/engine.js', 'js/data.js', 'js/lib.js', 'js/player.js', 'js/guide.js', 'js/poses.js', ...MEDIA_FILES.map(f => '../media/' + f + '.gif'), 'icons/icon-maskable-512.png', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('p35k-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
@@ -10,7 +11,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(new Promise(resolve => {
     const fallback = () => caches.open(CACHE).then(c => c.match(req).then(hit => hit || c.match('index.html'))).then(resolve);
     const t = setTimeout(fallback, 4000);
-    fetch(req).then(res => { clearTimeout(t); if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } resolve(res); }).catch(() => { clearTimeout(t); fallback(); });
+    fetch(req, { cache: 'no-cache' }).then(res => { clearTimeout(t); if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } resolve(res); }).catch(() => { clearTimeout(t); fallback(); });
   }));
 });
 self.addEventListener('notificationclick', e => {
