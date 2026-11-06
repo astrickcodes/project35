@@ -1,5 +1,5 @@
 // Offline-first: precache the app shell, network-first with offline cache fallback.
-const CACHE = 'p35-v13';
+const CACHE = 'p35-v14';
 const MEDIA_FILES = ["assistedPull", "bridge", "burpee", "calfRaise", "chinUp", "dbBentRow", "dbCurl", "dbPress", "dbRdl", "dbRow", "deadBug", "decline", "diamond", "gobletSquat", "inchworm", "inclinePush", "jumpSquat", "kneePush", "mountain", "pullup", "pushup", "scapPull", "scapPushup", "slBridge", "tableRow", "wallPush", "worldGreatest"];
 const SHELL = ['./', 'index.html', 'styles.css', 'manifest.webmanifest', 'js/app.js', 'js/engine.js', 'js/data.js', 'js/lib.js', 'js/player.js', 'js/guide.js', 'js/poses.js', 'icons/icon-maskable-512.png', ...MEDIA_FILES.map(f => 'media/' + f + '.gif'), 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });

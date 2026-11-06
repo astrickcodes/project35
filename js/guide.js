@@ -154,6 +154,14 @@ Object.assign(GUIDE, {
 });
 
 GUIDE.dbBentRow = GUIDE.dbRow;
+GUIDE.kegel = {
+  intro: 'Strengthens the pelvic-floor muscles that support your bladder and bowel and help core stability. This is a gentle 10-minute guided session. Short squeezes with real rests work better than one long squeeze.',
+  steps: ['Sit upright in a chair, or lie on your back with your knees bent. Relax your belly, thighs and bottom.', 'Find the right muscles once: imagine stopping yourself from passing wind, or stopping urine mid-flow. The gentle lift you feel inside is the pelvic floor. Do not practise by actually stopping urine.', 'When the screen says SQUEEZE, gently lift and tighten those muscles, as if lifting something up and in. Use about 30–40% effort, not maximum.', 'When it says RELAX, let go completely. The relaxing part matters as much as the squeeze.', 'Keep breathing normally throughout. The timer guides you through slow holds, longer holds and quick flicks, with rests in between.'],
+  breathe: 'Breathe normally. Never hold your breath. Try breathing out gently as you squeeze.', feel: 'A subtle inward and upward lift between your pubic bone and tailbone.',
+  mistakes: ['Squeezing your buttocks, thighs or belly instead. Those should stay soft.', 'Holding your breath.', 'Squeezing too hard or never fully relaxing. This can make the muscles tight and tired.', 'Pushing down instead of lifting up.', 'Doing it to the point of pain.'],
+  easier: 'Use gentler squeezes and shorter holds, or stop after the first section. A comfortable 5 minutes is fine.',
+  stop: 'Stop if you feel pelvic or lower-back pain. If you have ongoing pelvic pain, leaking, or are unsure you are doing it right, a doctor or pelvic-floor physiotherapist can check.' };
+
 const li = a => a.map(x => `<li>${x}</li>`).join('');
 // Returns the HTML for the instructions panel. `esc` is passed in to keep this module DOM-free.
 export function guideHtml(ex, esc, { first = true } = {}) {

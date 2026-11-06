@@ -3,6 +3,29 @@ import { EX } from './data.js';
 import { icon, esc, figure, ring } from './lib.js';
 import { guideHtml, shortCues, videoUrl, MEDIA } from './guide.js';
 
+// Guided 10-minute Kegel protocol: [label, sub, seconds, kind] — kind: on | off | flick | rest
+function kegelSegs() {
+  const S = [], add = (w, s, d, k) => S.push({ w, s, d, k });
+  add('Relax', 'Settle in. Breathe slowly. Soften belly, thighs and bottom.', 40, 'off');
+  for (let i = 1; i <= 12; i++) { add('Squeeze', `Slow hold · ${i} of 12 · lift gently, keep breathing`, 5, 'on'); add('Relax', 'Let go completely', 5, 'off'); }
+  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
+  for (let i = 1; i <= 8; i++) { add('Squeeze', `Long hold · ${i} of 8 · keep breathing`, 8, 'on'); add('Relax', 'Let go completely', 8, 'off'); }
+  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
+  for (let s = 1; s <= 3; s++) { for (let i = 1; i <= 10; i++) { add('Flick', `Quick flicks · set ${s} of 3 · squeeze and release fast`, 1, 'flick'); add('Release', `Quick flicks · set ${s} of 3`, 1, 'flickoff'); } if (s < 3) add('Rest', 'Breathe and stay relaxed', 15, 'rest'); }
+  add('Rest', 'Breathe and stay relaxed', 20, 'rest');
+  for (let i = 1; i <= 10; i++) { add('Squeeze', `Slow hold · ${i} of 10 · lift gently, keep breathing`, 6, 'on'); add('Relax', 'Let go completely', 6, 'off'); }
+  add('Relax', 'Well done. Breathe slowly and relax fully.', 42, 'off');
+  return S;
+}
+const KEGEL_SEGS = kegelSegs(), KEGEL_TOTAL = KEGEL_SEGS.reduce((a, s) => a + s.d, 0);
+const kegelItem = () => ({ exId: 'kegel', type: 'time', target: KEGEL_TOTAL, sets: 1, role: 'prep' });
+function kegelUI(rem) {
+  const el = KEGEL_TOTAL - Math.max(0, rem); let acc = 0, seg = KEGEL_SEGS[KEGEL_SEGS.length - 1], idx = KEGEL_SEGS.length - 1;
+  for (let i = 0; i < KEGEL_SEGS.length; i++) { acc += KEGEL_SEGS[i].d; if (el < acc) { seg = KEGEL_SEGS[i]; idx = i; break; } }
+  if (P.kgIdx !== idx) { if (P.kgIdx !== undefined && !seg.k.startsWith('flick')) beep(false); P.kgIdx = idx; }
+  const w = document.getElementById('kgw'), s = document.getElementById('kgs'), o = document.getElementById('kgorb');
+  if (w) w.textContent = seg.w; if (s) s.textContent = seg.s; if (o) o.className = 'kg-orb ' + seg.k;
+}
 let C = null, P = null, tickId = null, wake = null, audio = null;
 const root = () => document.getElementById('player');
 const cur = () => P.steps[P.i];
@@ -31,7 +54,9 @@ function build(plan) {
     ...plan.main.map(it => ({ g: plan.kind === 'train' ? 'Workout' : 'Session', it: mk(it, it.role === 'main' ? 'main' : 'mob') })),
     ...(plan.mob || []).map(it => ({ g: 'Mobility', it: mk(it, 'mob') })),
     ...plan.cool.map(it => ({ g: 'Cool-down', it: mk(it, 'prep') })),
+    ...((plan.kegelOnly || (!plan.extra && plan.kind !== 'rest')) ? [{ g: 'Daily Kegel', it: mk(kegelItem(), 'prep') }] : []),
   ];
+  if (plan.kegelOnly) steps.splice(0, steps.length - 1);
   return { date: plan.date, plan: { focus: plan.focus, title: plan.title, kind: plan.kind }, extra: !!plan.extra, steps, i: 0, set: 0, phase: 'work', activeMs: 0, startedAt: Date.now(), paused: false };
 }
 
@@ -51,7 +76,7 @@ function initWeight() {
 }
 function autoStart() {
   const st = cur(), prev = P.steps[P.i - 1];
-  if (st.it.type === 'time' && isPrep(st) && prev && isPrep(prev)) startTimer();
+  if (st.it.type === 'time' && st.it.exId !== 'kegel' && isPrep(st) && prev && isPrep(prev)) startTimer();
 }
 function startTimer() {
   const it = cur().it; P.tTotal = it.target; P.tEnd = Date.now() + it.target * 1000; P.tRun = true; P.tStart = Date.now();
@@ -67,7 +92,7 @@ function tick() {
   if (P.phase === 'work' && P.tRun) {
     const rem = Math.ceil((P.tEnd - now) / 1000);
     if (rem !== P.lastShown) { if (rem <= 3 && rem > 0) beep(false); P.lastShown = rem; }
-    setTimerUI(rem, P.tTotal);
+    setTimerUI(rem, P.tTotal); if (cur().it.exId === 'kegel') kegelUI((P.tEnd - now) / 1000);
     if (P.tEnd - now <= 0) { beep(true); completeSet(cur().it.target); }
   } else if (P.phase === 'rest') {
     const rem = Math.ceil((P.restEnd - now) / 1000);
@@ -87,6 +112,7 @@ function completeSet(reps) {
   const st = cur(), it = st.it;
   it.sets[P.set] = { reps: Math.max(0, Math.round(reps)), done: true, workSec: Math.max(1, Math.round((P.activeMs - (P.setAct || 0)) / 1000)) };
   if (it.load && +P.weight > 0) it.sets[P.set].weight = +P.weight;
+  if (it.exId === 'kegel' && reps >= 300) { (C.S.kegel ||= {})[P.date] = true; }
   stopTimer();
   const lastSet = P.set >= it.sets.length - 1;
   let next = null;
@@ -199,7 +225,7 @@ function draw() {
     <h1 class="pl-name">${esc(ex.name)}</h1>
     <div class="pl-target">${it.sets.length > 1 ? `${it.sets.length} sets × ` : ''}${it.target}${timeSet ? ' sec' : ' reps'}${uni}${it.role === 'main' ? ` · rest ${it.rest}s` : ''}${it.swapped ? ' · <span class="accent">easier version</span>' : ''}</div>
     <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${chips(ex)}</div>
-    <div class="pl-fig">${MEDIA.has(it.exId) ? `<img class="demo-gif" src="media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
+    <div class="pl-fig">${it.exId === 'kegel' ? `<div class="kg"><div class="kg-orb ${P.tRun ? '' : 'rest'}" id="kgorb"></div><div class="kg-word" id="kgw">${P.tRun ? '' : 'Get comfortable'}</div><div class="kg-sub" id="kgs">${P.tRun ? '' : 'Sit or lie down. Tap start when ready.'}</div></div>` : ''}${it.exId === 'kegel' ? '' : MEDIA.has(it.exId) ? `<img class="demo-gif" src="media/${it.exId}.gif" alt="${esc(ex.name)} demonstration"><span class="credit">© Gym visual</span>` : figure(ex)}</div>
     ${it.sets.length > 1 ? `<div class="setchips">${it.sets.map((s, i) => `<div class="setchip ${s.done ? 'done' : i === setIdx ? 'cur' : ''}"><span>Set ${i + 1}</span><b>${s.done ? s.reps + unitOf(it) : '–'}</b></div>`).join('')}</div>` : ''}
     ${timeSet ? `<div class="bigtime" id="tm">${mmss(P.tRun ? Math.max(0, Math.ceil((P.tEnd - Date.now()) / 1000)) : it.target)}</div>
         <div style="display:flex;justify-content:center;margin:4px 0 8px">${ring(P.tRun ? Math.max(0, (P.tEnd - Date.now()) / 1000 / P.tTotal) : 1, { size: 96, stroke: 7, label: '', sub: '' })}</div>` :

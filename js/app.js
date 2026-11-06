@@ -203,6 +203,7 @@ function workoutCard(plan, done, resumable) {
       `<button class="btn xl" data-act="start">${icon('play', 22)} ${resumable ? 'Resume workout' : rest ? 'Optional gentle stretching' : isTrain ? 'Start workout' : 'Start session'}</button>
        ${resumable ? '<button class="btn ghost" data-act="discard-session">Discard saved progress</button>' : ''}
        <div class="row" style="justify-content:center;gap:6px;flex-wrap:wrap">${rest ? '' : `<button class="btn ghost sm" data-act="plan-edit">Edit / skip exercises</button>`}<button class="btn ghost sm" data-act="change-focus">Different session</button></div>`}
+       <button class="btn sec" data-act="kegel">${S.kegel?.[todayStr()] ? '✓ Kegel done today · do again' : 'Daily Kegel · 10 min'}</button>
     </div></section>`;
 }
 
@@ -461,6 +462,7 @@ const A = {
     render();
   },
   'checkin-edit': () => { S.checkins[todayStr()] = {}; persist(); render(); },
+  kegel: () => { const t = todayStr(); runPlayer({ date: t, extra: true, kegelOnly: true, kind: 'train', focus: 'kegel', title: 'Kegel session', warm: [], main: [], mob: [], cool: [] }); },
   start: () => { const t = todayStr(); const plan = E.planFor(S, t); if (plan.kind === 'rest') return A['extra-mobility'](); runPlayer(plan); },
   'extra-mobility': () => { const t = todayStr(); const rec = E.buildPlan(S, t, { forceFocus: 'recovery' }); rec.title = 'Gentle stretch'; rec.main = rec.main.filter(i => i.exId !== 'walkGentle').slice(0, 5); rec.warm = []; rec.mob = []; rec.cool = []; rec.extra = true; runPlayer(rec); },
   'sheet-close': () => { closeSheet(); render(); },
