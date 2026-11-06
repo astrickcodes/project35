@@ -271,4 +271,5 @@ input::placeholder,textarea::placeholder{color:var(--dim)}
 .kg-orb{width:min(46vw,170px);height:min(46vw,170px);max-height:100%;border-radius:50%;background:var(--accent,#4ade80);opacity:.35;transform:scale(.6);transition:transform .9s ease,opacity .9s ease}
 .kg-orb.on{transform:scale(1);opacity:.95}.kg-orb.flick{transform:scale(1);opacity:.95;transition-duration:.15s}.kg-orb.flickoff{transform:scale(.6);transition-duration:.15s}
 .kg-word{font-size:30px;font-weight:700;letter-spacing:-.02em}.kg-sub{color:var(--mute);font-size:14px;min-height:20px}
-.kgfig{width:100%;max-height:42%;display:flex;justify-content:center}.kgfig svg{max-height:100%;width:auto;max-width:100%}.kg-orb{width:min(26vw,90px)!important;height:min(26vw,90px)!important}
+.kgfig{width:100%;max-height:50%;display:flex;justify-content:center}.kgfig svg{max-height:100%;width:auto;max-width:100%}.kg-orb{width:min(26vw,90px)!important;height:min(26vw,90px)!important}
+.kgfig{height:38vh;max-height:none!important;align-items:center}.kgfig svg{height:100%!important;width:100%!important;max-height:none!important}
